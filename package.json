@@ -1,6 +1,6 @@
 {
     "name": "musescore-dl",
-    "version": "0.31.0",
+    "version": "0.32.0",
     "description": "Download sheet music from Musescore",
     "main": "dist/main.user.js",
     "bin": "dist/cli.js",
