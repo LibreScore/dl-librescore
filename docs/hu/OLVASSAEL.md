@@ -22,12 +22,12 @@ Kotta letöltése
 
 4 különböző telepíthető program van:
 
-| Program                                                                            | MSCZ | MIDI | MP3 | PDF | Conversion |     | Windows | macOS | Linux | Android | iOS/iPadOS |
+| Program                                                                            | MSCZ | MIDI | MP3 | PDF | Konvertálás |     | Windows | macOS | Linux | Android | iOS/iPadOS |
 | ---------------------------------------------------------------------------------- | ---- | ---- | --- | --- | ---------- | --- | ------- | ----- | ----- | ------- | ---------- |
 | [App](#app)                             | ✔️   | ✔️   | ✔️  | ❌  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌         |
 | [Userscript](#userscript)               | ❌   | ✔️   | ✔️  | ✔️  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️         |
-| [Command-line tool](#command-line-tool) | ❌   | ✔️   | ✔️  | ✔️  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌         |
-| [Webmscore website](#webmscore-website) | ❌   | ❌   | ❌  | ❌  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️         |
+| [Parancssoros eszköz](#parancssoros-eszköz) | ❌   | ✔️   | ✔️  | ✔️  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌         |
+| [Webmscore webhely](#webmscore-webhely) | ❌   | ❌   | ❌  | ❌  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️         |
 
 > Megjegyzés: A `Konvertálás` a fájltípus megváltoztatására használható, olyan fájl típusra is konvertálhatsz amiben esetleg nem is tudtad letölteni a kottát.
 > Ezekre lehet konvertálni: Külön kivonatok, PDF, PNG, SVG, MP3, WAV, FLAC, OGG, MIDI, MusicXML, MSCZ és MSCX.
