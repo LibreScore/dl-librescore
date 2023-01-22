@@ -79,7 +79,7 @@ Hay 4 programas instalables diferentes:
 
 ### Sitio web de Webmscore
 
-1. Abra [Webmscore](https://librescore.github.io)
+1. Open [Webmscore](https://webmscore-pwa.librescore.org)
 
 > Nota: Puede acceder al sitio web sin conexión instalándolo como un PWA
 

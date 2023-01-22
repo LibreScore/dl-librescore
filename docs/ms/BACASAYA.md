@@ -79,7 +79,7 @@ Terdapat 4 program boleh dipasang yang berbeza:
 
 ### Laman web Webmscore
 
-1. Buka [Webmscore](https://librescore.github.io)
+1. Open [Webmscore](https://webmscore-pwa.librescore.org)
 
 > Nota: Anda boleh mengakses tapak web di luar talian dengan memasangnya sebagai PWA
 

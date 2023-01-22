@@ -79,7 +79,7 @@ Existují 4 různé instalovatelné programy:
 
 ### Webové stránky Webmscore
 
-1. Otevřete [Webmscore](https://librescore.github.io)
+1. Open [Webmscore](https://webmscore-pwa.librescore.org)
 
 > Poznámka: K webu můžete přistupovat offline, pokud si jej nainstalujete jako PWA
 
