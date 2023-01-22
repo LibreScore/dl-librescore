@@ -27,7 +27,7 @@
     "cli_file_extension_error": "Invalid file extension, only gp, gp3, gp4, gp5, gpx, gtp, kar, mid, midi, mscx, mscz, musicxml, mxl, ptb, and xml are supported",
     "cli_file_loaded_message": "File loaded",
     "cli_score_loaded_message": "Score loaded by Webmscore",
-    "cli_input_error": "Try using the Webmscore website instead: https://librescore.github.io",
+    "cli_input_error": "Try using the Webmscore website instead: https://webmscore-pwa.librescore.org",
     "cli_parts_message": "Part Selection",
     "cli_saved_message": "Saved {{file}}",
     "cli_done_message": "Done",
