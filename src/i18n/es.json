@@ -8,7 +8,7 @@
     "cli_file_extension_error": "Extensión de archivo no válida, solo se admiten gp, gp3, gp4, gp5, gpx, gtp, kar, mid, midi, mscx, mscz, musicxml, mxl, ptb y xml",
     "cli_file_loaded_message": "Archivo cargado",
     "cli_score_loaded_message": "Partitura cargada por Webmscore",
-    "cli_input_error": "Prueba utilizar la página web de Webmscore en lugar de: https://librescore.github.io",
+    "cli_input_error": "Prueba utilizar la página web de Webmscore en lugar de: https://webmscore-pwa.librescore.org",
     "cli_parts_message": "Selección de partes",
     "cli_saved_message": "Guardado {{file}}",
     "cli_done_message": "Hecho",
