@@ -23,7 +23,7 @@
     "cli_type_error": "Nem lett fájltípus kiválasztva",
     "cli_file_loaded_message": "Fájl betöltve",
     "cli_score_loaded_message": "Webmscore betöltötte a kottát",
-    "cli_input_error": "Inkább próbálja meg a Webmscore webhelyet használni: https://librescore.github.io",
+    "cli_input_error": "Inkább próbálja meg a Webmscore webhelyet használni: https://webmscore-pwa.librescore.org",
     "cli_parts_message": "Kivonat kijelölése",
     "cli_saved_message": "Mentve {{file}}",
     "cli_done_message": "Kész",
