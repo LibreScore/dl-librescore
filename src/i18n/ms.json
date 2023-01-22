@@ -26,7 +26,7 @@
     "cli_saved_message": "{{file}} disimpan",
     "cli_done_message": "Selesai",
     "cli_url_error": "URL tidak sah",
-    "cli_input_error": "Cuba gunakan tapak web Webmscore: https://librescore.github.io",
+    "cli_input_error": "Cuba gunakan tapak web Webmscore: https://webmscore-pwa.librescore.org",
     "cli_score_not_found": "Skor tidak ditemui",
     "cli_confirm_message": "Teruskan?",
     "title": "Tajuk: {{title}}",
