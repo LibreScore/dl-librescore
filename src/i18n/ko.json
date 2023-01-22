@@ -30,7 +30,7 @@
     "cli_file_extension_error": "잘못된 파일 확장자, gp, gp3, gp4, gp5, gpx, gtp, kar, mid, midi, mscx, mscz, musicxml, mxl, ptb, xml만 지원됨",
     "cli_file_loaded_message": "파일 로드 완료",
     "cli_score_loaded_message": "웹엠스코어로 악보 로드됨",
-    "cli_input_error": "웹엠스코어 웹사이트를 이용해 보세요. https://librescore.github.io",
+    "cli_input_error": "웹엠스코어 웹사이트를 이용해 보세요. https://webmscore-pwa.librescore.org",
     "cli_parts_message": "파트 선택",
     "cli_saved_message": "{{file}} 저장됨",
     "cli_url_error": "잘못된 URL",
