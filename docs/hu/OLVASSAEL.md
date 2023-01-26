@@ -79,7 +79,7 @@ Kotta letöltése
 
 ### Webmscore webhely
 
-1. Open [Webmscore](https://webmscore-pwa.librescore.org)
+1. [Webmscore](https://webmscore-pwa.librescore.org) megnyitása
 
 > Megjegyzés: A webhelyet offline is elérheti, ha PWA-ként telepíti
 
