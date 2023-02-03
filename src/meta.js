@@ -12,7 +12,7 @@
 // @match        https://musescore.com/*/*
 // @match        https://s.musescore.com/*/*
 // @license      MIT
-// @copyright    Copyright (c) 2022 LibreScore
+// @copyright    Copyright (c) 2023 LibreScore
 // @grant        unsafeWindow
 // @grant        GM.registerMenuCommand
 // @grant        GM.addElement
