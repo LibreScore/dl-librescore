@@ -19,38 +19,59 @@ const main = (): void => {
     const scoreinfo = new ScoreInfoInPage(document);
     const { fileName } = scoreinfo;
 
-    let indvPartBtn: HTMLButtonElement | null = null;
-    const fallback = () => {
-        // btns fallback to load from MSCZ file (`Individual Parts`)
-        return indvPartBtn?.click();
-    };
+    let meta =
+        document.querySelector(
+            "meta[property='musescore:author'][content='Official Scores']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='Official Author']"
+        );
 
-    btnList.add({
-        name: i18next.t("download", { fileType: "PDF" }),
-        action: BtnAction.process(
-            () => downloadPDF(scoreinfo, new SheetInfoInPage(document), saveAs),
-            fallback,
-            3 * 60 * 1000 /* 3min */
-        ),
-    });
+    if (meta) {
+        btnList.add({
+            name: i18next.t("official_button"),
+            action: BtnAction.openUrl("https://musescore.com/upgrade"),
+            tooltip: i18next.t("official_tooltip"),
+        });
+    } else {
+        let indvPartBtn: HTMLButtonElement | null = null;
+        const fallback = () => {
+            // btns fallback to load from MSCZ file (`Individual Parts`)
+            return indvPartBtn?.click();
+        };
 
-    btnList.add({
-        name: i18next.t("download", { fileType: "MIDI" }),
-        action: BtnAction.download(
-            () => getFileUrl(scoreinfo.id, "midi"),
-            fallback,
-            30 * 1000 /* 30s */
-        ),
-    });
+        btnList.add({
+            name: i18next.t("download", { fileType: "PDF" }),
+            action: BtnAction.process(
+                () =>
+                    downloadPDF(
+                        scoreinfo,
+                        new SheetInfoInPage(document),
+                        saveAs
+                    ),
+                fallback,
+                3 * 60 * 1000 /* 3min */
+            ),
+        });
 
-    btnList.add({
-        name: i18next.t("download", { fileType: "MP3" }),
-        action: BtnAction.download(
-            () => getFileUrl(scoreinfo.id, "mp3"),
-            fallback,
-            30 * 1000 /* 30s */
-        ),
-    });
+        btnList.add({
+            name: i18next.t("download", { fileType: "MIDI" }),
+            action: BtnAction.download(
+                () => getFileUrl(scoreinfo.id, "midi"),
+                fallback,
+                30 * 1000 /* 30s */
+            ),
+        });
+
+        btnList.add({
+            name: i18next.t("download", { fileType: "MP3" }),
+            action: BtnAction.download(
+                () => getFileUrl(scoreinfo.id, "mp3"),
+                fallback,
+                30 * 1000 /* 30s */
+            ),
+        });
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
     btnList.commit(BtnListMode.InPage);

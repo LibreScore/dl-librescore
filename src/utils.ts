@@ -172,18 +172,16 @@ export const waitForDocumentLoaded = (): Promise<void> => {
  * Run script before the page is fully loaded
  */
 export const waitForSheetLoaded = (): Promise<void> => {
-    if (document.readyState !== "complete") {
-        return new Promise((resolve) => {
-            const observer = new MutationObserver(() => {
-                const img = document.querySelector("img");
-                if (img) {
-                    resolve();
-                    observer.disconnect();
-                }
-            });
-            observer.observe(document, { childList: true, subtree: true });
+    return new Promise((resolve) => {
+        const observer = new MutationObserver(() => {
+            const meta = document.querySelector(
+                "meta[property='og:type'][content='musescore:score']"
+            );
+            if (meta) {
+                resolve();
+                observer.disconnect();
+            }
         });
-    } else {
-        return Promise.resolve();
-    }
+        observer.observe(document, { childList: true, subtree: true });
+    });
 };

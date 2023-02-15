@@ -1,6 +1,8 @@
 {
     "processing": "Processing…",
     "download": "Download {{fileType}}",
+    "official_button": "Subscription required",
+    "official_tooltip": "Official Scores require a MuseScore Pro+ subscription (free trial available) to download.",
     "download_audio": "Download {{fileType}} audio",
     "full_score": "Full score",
     "button_parent_not_found": "Button parent not found",
