@@ -4,5 +4,7 @@
     "full_score": "Volledige partituur",
     "unknown_button_list_mode": "Ongekende knop lijst modus",
     "processing": "Verwerken…",
-    "button_parent_not_found": "Parent knop niet gevonden"
+    "button_parent_not_found": "Parent knop niet gevonden",
+    "official_button": "Abonnement vereist",
+    "official_tooltip": "Officiële partituren vereisen een MuseScore Pro+ abonnement (gratis proefversie beschikbaar) om te downloaden."
 }
