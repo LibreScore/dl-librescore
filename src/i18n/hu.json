@@ -39,5 +39,7 @@
     "cli_example_folder": "minden fájl mentése MIDI és PDF formátumba a kiválasztott mappából a jelenlegi mappába",
     "cli_outdated_version_message": "\nÚj verzió érhető el! A jelenlegi verzió {{installed}}\nFuttasd a npm i -g dl-librescore@{{latest}} parancsot a frissítéshez",
     "cli_file_extension_error": "Érvénytelen fájltípus, csak a gp, gp3, gp4, gp5, gpx, gtp, kar, mid, midi, mscx, mscz, musicxml, mxl, ptb és xml fájltípusok támogatottak",
-    "cli_score_not_found": "A kotta nem található"
+    "cli_score_not_found": "A kotta nem található",
+    "official_button": "Előfizetés szükséges",
+    "official_tooltip": "A Hivatalos partiturák letöltéséhez MuseScore Pro+ előfizetés szükséges (ingyenes próbaverzió elérhető)."
 }
