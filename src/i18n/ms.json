@@ -39,5 +39,7 @@
     "cli_outdated_version_message": "\nVersi baharu tersedia! Versi semasa {{installed}}\nJalankan npm i -g dl-librescore@{{latest}} untuk mengemas kini",
     "cli_file_extension_error": "Sambungan fail tidak sah, hanya gp, gp3, gp4, gp5, gpx, gtp, kar, mid, midi, mscx, mscz, musicxml, mxl, ptb dan xml disokong",
     "cli_url_type_error": "Hanya MIDI, MP3 dan PDF boleh dimuat turun daripada URL",
-    "no_sheet_images_error": "Tiada imej helaian ditemui"
+    "no_sheet_images_error": "Tiada imej helaian ditemui",
+    "official_button": "Langganan diperlukan",
+    "official_tooltip": "Skor Rasmi memerlukan langganan MuseScore Pro+ (percubaan percuma tersedia) untuk dimuat turun."
 }
