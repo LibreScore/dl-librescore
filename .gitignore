@@ -65,8 +65,6 @@ typings/
 
 1.*
 
-dist/cache
-dist/ext*
-dist/cli.js
+dist/
 
 .vscode/
