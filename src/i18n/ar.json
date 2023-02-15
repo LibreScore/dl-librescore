@@ -37,7 +37,9 @@
     "source_code": "",
     "version": "",
     "processing": "",
-    "download": "",
+    "download": "تنزيل {{fileType}}",
     "full_score": "تدوين كامل",
-    "download_audio": ""
+    "download_audio": "تنزيل صوت {{fileType}}",
+    "official_button": "الاشتراك المطلوبة",
+    "official_tooltip": "تتطلب النتائج الرسمية اشتراك MuseScore Pro+ (يتوفر إصدار تجريبي مجاني) للتنزيل."
 }
