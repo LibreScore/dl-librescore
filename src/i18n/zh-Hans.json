@@ -39,5 +39,7 @@
     "title": "标题：{{title}}",
     "no_sheet_images_error": "没有发现乐谱图像",
     "source_code": "源码",
-    "version": "版本：{{version}}"
+    "version": "版本：{{version}}",
+    "official_button": "需要订阅",
+    "official_tooltip": "官方乐谱需要订阅 MuseScore Pro+（可免费试用）才能下载。"
 }
