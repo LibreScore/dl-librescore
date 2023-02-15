@@ -1,9 +1,9 @@
 {
     "cli_usage_hint": "",
     "processing": "",
-    "download": "",
+    "download": "Загрузить {{fileType}}",
     "full_score": "Партитура целиком",
-    "download_audio": "",
+    "download_audio": "Скачать {{fileType}} аудио",
     "button_parent_not_found": "",
     "unknown_button_list_mode": "",
     "cli_example_url": "",
@@ -39,5 +39,7 @@
     "title": "",
     "no_sheet_images_error": "",
     "source_code": "",
-    "version": ""
+    "version": "",
+    "official_button": "Требуется подписка",
+    "official_tooltip": "Для загрузки Официальных партитур требуется подписка MuseScore Pro+ (доступна бесплатная пробная версия)."
 }
