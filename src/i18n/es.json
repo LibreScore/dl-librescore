@@ -39,5 +39,7 @@
     "cli_input_message": "URL de MuseScore o ruta al archivo o carpeta:",
     "cli_input_suffix": "inicia con https://musescore.com/ o es una ruta de acceso",
     "cli_types_message": "Selección de tipo de archivo",
-    "cli_output_message": "Directorio de salida:"
+    "cli_output_message": "Directorio de salida:",
+    "official_button": "Se requiere suscripción",
+    "official_tooltip": "Las Partituras oficiales requieren una suscripción a MuseScore Pro+ (prueba gratuita disponible) para descargar."
 }
