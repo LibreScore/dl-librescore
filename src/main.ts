@@ -19,15 +19,11 @@ const main = (): void => {
     const scoreinfo = new ScoreInfoInPage(document);
     const { fileName } = scoreinfo;
 
-    let meta =
-        document.querySelector(
-            "meta[property='musescore:author'][content='Official Scores']"
-        ) ||
-        document.querySelector(
-            "meta[property='musescore:author'][content='Official Author']"
-        );
+    let meta = document.querySelector(
+        "img[src^='https://musescore.com/static/musescore/scoredata/g/']"
+    );
 
-    if (meta) {
+    if (!meta) {
         btnList.add({
             name: i18next.t("official_button"),
             action: BtnAction.openUrl("https://musescore.com/upgrade"),
