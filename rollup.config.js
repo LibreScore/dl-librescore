@@ -15,26 +15,8 @@ const getBannerText = () => {
     return bannerText;
 };
 
-function modifyWrapper() {
-    const js = fs.readFileSync("./dist/wrapper.js", "utf-8");
-    const index = js
-        .split(/\n/g)
-        .findIndex((value) => value.includes("require$$0"));
-    let startJs = js.split(/\n/g).slice(0, index);
-    startJs.push(["  const i18next = instance;\n"]);
-    startJs = startJs.join("\n");
-    const endJs = js
-        .split(/\n/g)
-        .slice(index + 9 + fs.readdirSync("./src/i18n/").length - 1)
-        .join("\n");
-    fs.writeFileSync("./dist/wrapper.js", startJs + endJs);
-}
-
 const getWrapper = (startL, endL) => {
-    if (startL === 3) {
-        modifyWrapper();
-    }
-    const js = fs.readFileSync("./dist/wrapper.js", "utf-8");
+    const js = fs.readFileSync("./src/wrapper.js", "utf-8");
     return js.split(/\n/g).slice(startL, endL).join("\n");
 };
 
@@ -98,24 +80,14 @@ export default [
         plugins,
     },
     {
-        input: "src/wrapper.js",
-        output: {
-            file: "dist/wrapper.js",
-            format: "iife",
-            name: "wrapper",
-            sourcemap: false,
-        },
-        plugins,
-    },
-    {
         input: "src/main.ts",
         output: {
             file: "dist/main.user.js",
             format: "iife",
             sourcemap: false,
             banner: getBannerText,
-            intro: () => getWrapper(3, -13),
-            outro: () => getWrapper(-13, -9),
+            intro: () => getWrapper(0, -5),
+            outro: () => getWrapper(-5),
         },
         plugins,
     },

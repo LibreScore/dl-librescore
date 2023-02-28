@@ -12,6 +12,38 @@ import i18nextInit, { i18next } from "./i18n/index";
     await i18nextInit;
 })();
 
+/* eslint-disable */
+const w = typeof unsafeWindow == "object" ? unsafeWindow : window;
+
+// GM APIs glue
+const _GM = typeof GM == "object" ? GM : undefined;
+const gmId = "" + Math.random();
+w[gmId] = _GM;
+
+if (_GM && _GM.registerMenuCommand && _GM.openInTab) {
+    // add buttons to the userscript manager menu
+    _GM.registerMenuCommand(
+        "** " +
+            i18next.t("version", { version: _GM.info.script.version }) +
+            " **",
+        () =>
+            _GM.openInTab(
+                "https://github.com/LibreScore/dl-librescore/releases",
+                {
+                    active: true,
+                }
+            )
+    );
+
+    _GM.registerMenuCommand("** " + i18next.t("source_code") + " **", () =>
+        _GM.openInTab(_GM.info.script.homepage, { active: true })
+    );
+
+    _GM.registerMenuCommand("** Discord **", () =>
+        _GM.openInTab("https://discord.gg/DKu7cUZ4XQ", { active: true })
+    );
+}
+
 const { saveAs } = FileSaver;
 
 const main = (): void => {
