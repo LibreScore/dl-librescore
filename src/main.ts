@@ -13,9 +13,6 @@ import { isGmAvailable, _GM } from "./gm";
     await i18nextInit;
 })();
 
-/* eslint-disable */
-const w = typeof unsafeWindow == "object" ? unsafeWindow : window;
-
 if (isGmAvailable("registerMenuCommand")) {
     // add buttons to the userscript manager menu
     _GM.registerMenuCommand(
