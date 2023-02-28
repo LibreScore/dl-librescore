@@ -7,6 +7,7 @@ import { getFileUrl } from "./file";
 import { BtnList, BtnAction, BtnListMode } from "./btn";
 import { ScoreInfoInPage, SheetInfoInPage } from "./scoreinfo";
 import i18nextInit, { i18next } from "./i18n/index";
+import { isGmAvailable, _GM } from "./gm";
 
 (async () => {
     await i18nextInit;
@@ -15,12 +16,7 @@ import i18nextInit, { i18next } from "./i18n/index";
 /* eslint-disable */
 const w = typeof unsafeWindow == "object" ? unsafeWindow : window;
 
-// GM APIs glue
-const _GM = typeof GM == "object" ? GM : undefined;
-const gmId = "" + Math.random();
-w[gmId] = _GM;
-
-if (_GM && _GM.registerMenuCommand && _GM.openInTab) {
+if (isGmAvailable("registerMenuCommand")) {
     // add buttons to the userscript manager menu
     _GM.registerMenuCommand(
         "** " +
