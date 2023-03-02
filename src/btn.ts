@@ -156,21 +156,32 @@ export class BtnList {
     }
 
     private _commit() {
-        const btnParent = document.querySelector("div") as HTMLDivElement;
-        const shadow = attachShadow(btnParent);
+        const btnParent = document.querySelector(
+            "div.react-container"
+        ) as HTMLDivElement;
+        let isNew = false;
+        let shadow = btnParent.shadowRoot;
+        if (!shadow) {
+            isNew = true;
+            shadow = attachShadow(btnParent);
+        }
 
-        // style the shadow DOM
-        const style = document.createElement("style");
-        style.innerText = btnListCss;
-        shadow.append(style);
+        if (isNew) {
+            // style the shadow DOM
+            const style = document.createElement("style");
+            style.innerText = btnListCss;
+            shadow.append(style);
 
-        // hide buttons using the shadow DOM
-        const slot = document.createElement("slot");
-        shadow.append(slot);
+            // hide buttons using the shadow DOM
+            const slot = document.createElement("slot");
+            shadow.append(slot);
+        }
 
         const newParent = document.createElement("div");
         newParent.append(...this.list.map((e) => cloneBtn(e)));
-        shadow.append(newParent);
+        isNew
+            ? shadow.append(newParent)
+            : shadow.replaceChild(newParent, shadow.querySelector("div")!);
 
         // default position
         newParent.style.top = `${
@@ -181,13 +192,14 @@ export class BtnList {
             (anchorDiv: HTMLDivElement) => {
                 const pos = () => this._positionBtns(anchorDiv, newParent);
                 pos();
+                if (isNew) {
+                    // reposition btns when window resizes
+                    window.addEventListener("resize", pos, { passive: true });
 
-                // reposition btns when window resizes
-                window.addEventListener("resize", pos, { passive: true });
-
-                // reposition btns when scrolling
-                const scroll = getScrollParent(anchorDiv);
-                scroll.addEventListener("scroll", pos, { passive: true });
+                    // reposition btns when scrolling
+                    const scroll = getScrollParent(anchorDiv);
+                    scroll.addEventListener("scroll", pos, { passive: true });
+                }
             }
         );
 

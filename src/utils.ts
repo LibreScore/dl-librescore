@@ -148,7 +148,7 @@ export const windowOpenAsync = (
 
 export const attachShadow = (el: Element): ShadowRoot => {
     return Element.prototype.attachShadow.call(el, {
-        mode: "closed",
+        mode: "open",
     }) as ShadowRoot;
 };
 

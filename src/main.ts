@@ -40,6 +40,7 @@ if (isGmAvailable("registerMenuCommand")) {
 const { saveAs } = FileSaver;
 
 const main = (): void => {
+    let isOfficial = false;
     new Promise(() => {
         const observer = new MutationObserver(() => {
             const img = document.querySelector(
@@ -54,16 +55,19 @@ const main = (): void => {
                         "meta[property='musescore:author'][content='Official Author']"
                     )
                 ) {
-                    const btnList = new BtnList();
-                    btnList.add({
-                        name: i18next.t("official_button"),
-                        action: BtnAction.openUrl(
-                            "https://musescore.com/upgrade"
-                        ),
-                        tooltip: i18next.t("official_tooltip"),
-                    });
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    btnList.commit(BtnListMode.InPage);
+                    if (!isOfficial) {
+                        isOfficial = true;
+                        const btnList = new BtnList();
+                        btnList.add({
+                            name: i18next.t("official_button"),
+                            action: BtnAction.openUrl(
+                                "https://musescore.com/upgrade"
+                            ),
+                            tooltip: i18next.t("official_tooltip"),
+                        });
+                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                        btnList.commit(BtnListMode.InPage);
+                    }
                 }
             } else {
                 observer.disconnect();
