@@ -6,16 +6,12 @@ import en from "./en.json";
 import es from "./es.json";
 import fr from "./fr.json";
 import hu from "./hu.json";
-import id from "./id.json";
 import it from "./it.json";
 import ja from "./ja.json";
 import ko from "./ko.json";
 import ms from "./ms.json";
 import nl from "./nl.json";
-import pl from "./pl.json";
-import pt from "./pt.json";
 import ru from "./ru.json";
-import tr from "./tr.json";
 import zh_Hans from "./zh-Hans.json";
 
 function getLocale(): string {
@@ -27,16 +23,12 @@ function getLocale(): string {
     "es",
     "fr",
     "hu",
-    "id",
     "it",
     "ja",
     "ko",
     "ms",
     "nl",
-    "pl",
-    "pt",
     "ru",
-    "tr",
     "zh-Hans",
   ];
 
@@ -106,16 +98,12 @@ export default i18n.init({
     es: { translation: es },
     fr: { translation: fr },
     hu: { translation: hu },
-    id: { translation: id },
     it: { translation: it },
     ja: { translation: ja },
     ko: { translation: ko },
     ms: { translation: ms },
     nl: { translation: nl },
-    pl: { translation: pl },
-    pt: { translation: pt },
     ru: { translation: ru },
-    tr: { translation: tr },
     "zh-Hans": { translation: zh_Hans },
   },
 });
