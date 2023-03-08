@@ -106,6 +106,10 @@ export default i18n.init({
     ru: { translation: ru },
     "zh-Hans": { translation: zh_Hans },
   },
+  interpolation: {
+    // Fix output path `path/to/file` being displayed as `path&#x2F;to&#x2F;file` in cli (verbose mode)
+    escapeValue: false,
+  },
 });
 
 export const i18next = i18n;
