@@ -39,6 +39,7 @@
     "inquirer": "^8.2.4",
     "node-fetch": "^2.6.7",
     "ora": "^5.4.1",
+    "proxy-agent": "^5.0.0",
     "webmscore": "^0.21.0",
     "yargs": "^17.5.1"
   },

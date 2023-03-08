@@ -27,12 +27,20 @@ export const getFetch = (): typeof fetch => {
     } else {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const nodeFetch = require("node-fetch");
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        // Use proxy based on standard proxy environment variables
+        const ProxyAgent = require("proxy-agent");
         return (input: RequestInfo, init?: RequestInit) => {
             if (typeof input === "string" && !input.startsWith("http")) {
                 // fix: Only absolute URLs are supported
                 input = "https://musescore.com" + input;
             }
-            init = Object.assign({ headers: NODE_FETCH_HEADERS }, init);
+            init = Object.assign({
+                headers: NODE_FETCH_HEADERS,
+                // Use the `HTTPS_PROXY` environment variable for no URL given
+                // see: https://github.com/TooTallNate/node-proxy-agent#proxy-agent
+                agent: new ProxyAgent(),
+            }, init);
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return nodeFetch(input, init);
         };
