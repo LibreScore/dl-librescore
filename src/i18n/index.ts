@@ -13,6 +13,7 @@ import ms from "./ms.json";
 import nl from "./nl.json";
 import ru from "./ru.json";
 import zh_Hans from "./zh-Hans.json";
+import zh_Hant from "./zh_Hant.json";
 
 function getLocale(): string {
   let languageMap = [
@@ -30,6 +31,7 @@ function getLocale(): string {
     "nl",
     "ru",
     "zh-Hans",
+    "zh_Hant",
   ];
 
   let locale: string = "en";
@@ -105,6 +107,7 @@ export default i18n.init({
     nl: { translation: nl },
     ru: { translation: ru },
     "zh-Hans": { translation: zh_Hans },
+    zh_Hant: { translation: zh_Hant },
   },
   interpolation: {
     // Fix output path `path/to/file` being displayed as `path&#x2F;to&#x2F;file` in cli (verbose mode)
