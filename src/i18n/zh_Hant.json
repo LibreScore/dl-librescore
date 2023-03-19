@@ -1,3 +1,9 @@
 {
-    "full_score": "全份樂譜"
+    "full_score": "全份樂譜",
+    "processing": "處理中……",
+    "official_button": "需要訂閱",
+    "download_audio": "下載 {{fileType}} 音頻",
+    "button_parent_not_found": "找不到按鍵的上級",
+    "download": "下載 {{fileType}}",
+    "official_tooltip": "官方樂譜需要訂閱 MuseScore Pro+（可免費試用）才能下載。"
 }
