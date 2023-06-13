@@ -2,7 +2,7 @@
     "processing": "처리 중…",
     "download": "{{fileType}} 다운로드",
     "download_audio": "{{fileType}} 오디오 다운로드",
-    "full_score": "풀 스코어",
+    "full_score": "전체 악보",
     "cli_done_message": "완료",
     "cli_score_not_found": "악보 찾을 수 없음",
     "cli_confirm_message": "계속하시겠습니까?",
