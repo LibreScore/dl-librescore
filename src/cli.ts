@@ -27,7 +27,7 @@ const argv: any = yargs(hideBin(process.argv))
     .usage(i18next.t("cli_usage_hint", { bin: "$0" }))
     .example(
         "$0 -i https://musescore.com/user/123/scores/456 -t mp3 -o " +
-        process.cwd(),
+            process.cwd(),
         i18next.t("cli_example_url")
     )
     .example(
@@ -103,62 +103,65 @@ const checkboxValidate = (input: number[]) => {
 };
 
 const createDirectoryIfNotExist = (input: string) => {
-    const dirExists = fs.existsSync(input)
+    const dirExists = fs.existsSync(input);
 
     if (!dirExists) {
-        fs.mkdirSync(input, { recursive: true })
+        fs.mkdirSync(input, { recursive: true });
     }
-}
+};
 
 const getOutputDir = async (defaultOutput: string) => {
-    let dirNotExistsTries = 0
-    let lastTryDir: string | null = null
+    let dirNotExistsTries = 0;
+    let lastTryDir: string | null = null;
 
     const { output } = await inquirer.prompt<Params>({
         type: "input",
         name: "output",
         message: i18next.t("cli_output_message"),
-        async validate (input: string) {
-            if (!input) return false
+        async validate(input: string) {
+            if (!input) return false;
 
-            const dirExists = fs.existsSync(input)
+            const dirExists = fs.existsSync(input);
 
             if (!dirExists) {
                 if (lastTryDir !== input) {
-                    lastTryDir = input
-                    dirNotExistsTries = 0
+                    lastTryDir = input;
+                    dirNotExistsTries = 0;
                 }
 
-                dirNotExistsTries++
+                dirNotExistsTries++;
 
                 if (dirNotExistsTries >= 2) {
-                    fs.mkdirSync(input, { recursive: true })
+                    fs.mkdirSync(input, { recursive: true });
                 } else {
-                    return i18next.t("cli_output_not_found")
+                    try {
+                        fs.accessSync(input);
+                    } catch (e) {
+                        return (
+                            `${e.message}` +
+                            "\n   " +
+                            `${chalk.bold(i18next.t("cli_confirm_message"))}` +
+                            `${chalk.dim(" (Enter ↵)")}`
+                        );
+                    }
                 }
-            }
+            } else if (!fs.statSync(input).isDirectory()) return false;
 
-            dirNotExistsTries = 0
-
-            const isDirectory = fs.statSync(input).isDirectory()
-
-            if (!isDirectory) {
-                return i18next.t("cli_output_invalid")
-            }
+            dirNotExistsTries = 0;
 
             try {
-                fs.accessSync(input)
+                fs.accessSync(input);
             } catch (e) {
-                return e.message
+                return e.message;
             }
 
-            return true
+            return true;
         },
         default: defaultOutput,
     });
 
-    return output
-}
+    return output;
+};
 
 void (async () => {
     if (!isNpx()) {
@@ -204,7 +207,7 @@ void (async () => {
                 "\n  (" +
                 i18next.t("cli_input_suffix") +
                 `) ${chalk.bgGray(pasteMessage)}\n `,
-            validate (input: string) {
+            validate(input: string) {
                 return (
                     input &&
                     (!!input.match(SCORE_URL_REG) ||
@@ -286,7 +289,7 @@ void (async () => {
 
                 // output directory
                 spinner.stop();
-                const output = await getOutputDir(argv.output)
+                const output = await getOutputDir(argv.output);
                 spinner.start();
                 argv.output = output;
             }
@@ -296,7 +299,7 @@ void (async () => {
 
         await Promise.all(
             filePaths.map(async (filePath) => {
-                createDirectoryIfNotExist(filePath)
+                createDirectoryIfNotExist(filePath);
                 // validate input file
                 if (!fs.statSync(filePath).isFile()) {
                     spinner.fail(i18next.t("cli_file_error"));
@@ -447,12 +450,12 @@ void (async () => {
                 if (isInteractive && isFile) {
                     // output directory
                     spinner.stop();
-                    const output = await getOutputDir(argv.output)
+                    const output = await getOutputDir(argv.output);
                     spinner.start();
                     argv.output = output;
                 }
 
-                createDirectoryIfNotExist(argv.output)
+                createDirectoryIfNotExist(argv.output);
 
                 // validate output directory
                 try {
@@ -550,10 +553,10 @@ void (async () => {
                 spinner.stop();
                 console.log(
                     `${chalk.yellow("!")} ` +
-                    i18next.t("id", { id: scoreinfo.id }) +
-                    "\n  " +
-                    i18next.t("title", { title: scoreinfo.title }) +
-                    "\n "
+                        i18next.t("id", { id: scoreinfo.id }) +
+                        "\n  " +
+                        i18next.t("title", { title: scoreinfo.title }) +
+                        "\n "
                 );
                 spinner.start();
             }
@@ -577,12 +580,12 @@ void (async () => {
             types = types.types;
 
             // output directory
-            const output = await getOutputDir(argv.output)
+            const output = await getOutputDir(argv.output);
             spinner.start();
             argv.output = output;
         }
 
-        createDirectoryIfNotExist(argv.output)
+        createDirectoryIfNotExist(argv.output);
 
         // validate output directory
         try {
