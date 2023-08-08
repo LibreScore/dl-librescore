@@ -102,6 +102,67 @@ const checkboxValidate = (input: number[]) => {
     return input.length >= 1;
 };
 
+const createDirectoryIfNotExist = (input: string) => {
+    const dirExists = fs.existsSync(input);
+
+    if (!dirExists) {
+        fs.mkdirSync(input, { recursive: true });
+    }
+};
+
+const getOutputDir = async (defaultOutput: string) => {
+    let dirNotExistsTries = 0;
+    let lastTryDir: string | null = null;
+
+    const { output } = await inquirer.prompt<Params>({
+        type: "input",
+        name: "output",
+        message: i18next.t("cli_output_message"),
+        async validate(input: string) {
+            if (!input) return false;
+
+            const dirExists = fs.existsSync(input);
+
+            if (!dirExists) {
+                if (lastTryDir !== input) {
+                    lastTryDir = input;
+                    dirNotExistsTries = 0;
+                }
+
+                dirNotExistsTries++;
+
+                if (dirNotExistsTries >= 2) {
+                    fs.mkdirSync(input, { recursive: true });
+                } else {
+                    try {
+                        fs.accessSync(input);
+                    } catch (e) {
+                        return (
+                            `${e.message}` +
+                            "\n   " +
+                            `${chalk.bold(i18next.t("cli_confirm_message"))}` +
+                            `${chalk.dim(" (Enter ↵)")}`
+                        );
+                    }
+                }
+            } else if (!fs.statSync(input).isDirectory()) return false;
+
+            dirNotExistsTries = 0;
+
+            try {
+                fs.accessSync(input);
+            } catch (e) {
+                return e.message;
+            }
+
+            return true;
+        },
+        default: defaultOutput,
+    });
+
+    return output;
+};
+
 void (async () => {
     if (!isNpx()) {
         const { installed, latest, isLatest } = await getVerInfo();
@@ -228,15 +289,7 @@ void (async () => {
 
                 // output directory
                 spinner.stop();
-                const { output } = await inquirer.prompt<Params>({
-                    type: "input",
-                    name: "output",
-                    message: i18next.t("cli_output_message"),
-                    validate(input: string) {
-                        return input && fs.statSync(input).isDirectory();
-                    },
-                    default: argv.output,
-                });
+                const output = await getOutputDir(argv.output);
                 spinner.start();
                 argv.output = output;
             }
@@ -246,6 +299,7 @@ void (async () => {
 
         await Promise.all(
             filePaths.map(async (filePath) => {
+                createDirectoryIfNotExist(filePath);
                 // validate input file
                 if (!fs.statSync(filePath).isFile()) {
                     spinner.fail(i18next.t("cli_file_error"));
@@ -396,18 +450,12 @@ void (async () => {
                 if (isInteractive && isFile) {
                     // output directory
                     spinner.stop();
-                    const { output } = await inquirer.prompt<Params>({
-                        type: "input",
-                        name: "output",
-                        message: i18next.t("cli_output_message"),
-                        validate(input: string) {
-                            return input && fs.statSync(input).isDirectory();
-                        },
-                        default: argv.output,
-                    });
+                    const output = await getOutputDir(argv.output);
                     spinner.start();
                     argv.output = output;
                 }
+
+                createDirectoryIfNotExist(argv.output);
 
                 // validate output directory
                 try {
@@ -532,18 +580,12 @@ void (async () => {
             types = types.types;
 
             // output directory
-            const { output } = await inquirer.prompt<Params>({
-                type: "input",
-                name: "output",
-                message: i18next.t("cli_output_message"),
-                validate(input: string) {
-                    return input && fs.statSync(input).isDirectory();
-                },
-                default: argv.output,
-            });
+            const output = await getOutputDir(argv.output);
             spinner.start();
             argv.output = output;
         }
+
+        createDirectoryIfNotExist(argv.output);
 
         // validate output directory
         try {
