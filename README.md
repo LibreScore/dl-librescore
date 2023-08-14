@@ -22,17 +22,19 @@ Download sheet music
 
 There are 4 different installable programs:
 
-| Program                                                                            | MSCZ | MIDI | MP3 | PDF | Conversion |     | Windows | macOS | Linux | Android | iOS/iPadOS |
-| ---------------------------------------------------------------------------------- | ---- | ---- | --- | --- | ---------- | --- | ------- | ----- | ----- | ------- | ---------- |
-| [App](#app)                             | ❌   | ✔️   | ✔️  | ❌  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌         |
-| [Userscript](#userscript)               | ❌   | ✔️   | ✔️  | ✔️  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️         |
-| [Command-line tool](#command-line-tool) | ❌   | ✔️   | ✔️  | ✔️  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌         |
-| [Webmscore website](#webmscore-website) | ❌   | ❌   | ❌  | ❌  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️         |
+| Program                                 | MSCZ | MIDI | MP3 | PDF | Conversion |     | Windows | macOS | Linux | Android | iOS/iPadOS |
+| --------------------------------------- | ---- | ---- | --- | --- | ---------  | --- | ------- | ----- | ----- | ------- | ---------- |
+| [App](#app)                             | ❌   | ❌   | ❌  | ❌  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌          |
+| [Userscript](#userscript)               | ❌   | ✔️   | ✔️  | ✔️  | ❌         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️          |
+| [Command-line tool](#command-line-tool) | ❌   | ✔️   | ✔️  | ✔️  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ❌          |
+| [Webmscore website](#webmscore-website) | ❌   | ❌   | ❌  | ❌  | ✔️         |     | ✔️      | ✔️    | ✔️    | ✔️      | ✔️          |
 
 > Note: `Conversion` refers to the ability to convert files into other file types, including those not downloadable in the program.
 > Conversion types include: Individual Parts, PDF, PNG, SVG, MP3, WAV, FLAC, OGG, MIDI, MusicXML, MSCZ, and MSCX.
 
 ### App
+
+> Note: Musescore has patched the App as of 8 August 2023. All downloads from the App are currently not working. Please use any option based on the [Userscript](#userscript) instead.
 
 1. Go to the [README](https://github.com/LibreScore/app-librescore#installation) page of the `app-librescore` repository
 2. Follow the installation instructions for your device
