@@ -50,7 +50,7 @@
     "@types/inquirer": "^8.2.1",
     "@types/pdfkit": "^0.12.6",
     "@types/yargs": "^17.0.10",
-    "pdfkit": "git+https://github.com/LibreScore/pdfkit.git",
+    "pdfkit": "^0.13.0",
     "rollup": "^2.75.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-globals": "^1.4.0",
