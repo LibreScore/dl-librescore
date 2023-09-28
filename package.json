@@ -1,6 +1,6 @@
 {
   "name": "dl-librescore",
-  "version": "0.34.47",
+  "version": "0.34.48",
   "description": "Download sheet music",
   "main": "dist/main.user.js",
   "bin": "dist/cli.js",

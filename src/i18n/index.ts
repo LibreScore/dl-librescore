@@ -37,7 +37,7 @@ function getLocale(): string {
   let locale: string = "en";
   if (typeof window !== "undefined") {
     let localeOrder = navigator.languages?.concat(
-      Intl.DateTimeFormat().resolvedOptions().locale
+      Intl.DateTimeFormat().resolvedOptions().locale,
     ) ?? ["en"];
     let localeArray = Object.values(languageMap).map((arr) => arr[0]);
 
@@ -50,11 +50,11 @@ function getLocale(): string {
         return true;
       } else if (
         localeArray.some((locale) =>
-          locale.startsWith(localeItem.substring(0, 2))
+          locale.startsWith(localeItem.substring(0, 2)),
         )
       ) {
         locale = localeArray.find((locale) =>
-          locale.startsWith(localeItem.substring(0, 2))
+          locale.startsWith(localeItem.substring(0, 2)),
         )!;
         return true;
       }
