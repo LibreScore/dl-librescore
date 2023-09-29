@@ -145,7 +145,7 @@ export class SheetInfoInPage extends SheetInfo {
 }
 
 export class SheetInfoHtml extends SheetInfo {
-    private readonly PAGE_COUNT_REG = /pages(?:&quot;|"):(\d+),/;
+    private readonly PAGE_COUNT_REG = /pages(?:&quot;|"):(\d+)/;
     private readonly THUMBNAIL_REG =
         /<link (?:.*) href="(.*)" rel="preload" as="image"/;
 
