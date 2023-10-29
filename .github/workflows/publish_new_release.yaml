@@ -63,7 +63,7 @@ jobs:
                   rm *.tar.gz
                   files=$(ls .)
                   assets=()
-                  for f in $files; do [ -f "$f" ] && assets+=(-a "$f"); done
+                  for f in $files; do [ -f "$f" ] && assets+=("$f"); done
                   SHORT_SHA=$(echo $REF | cut -c 1-7)
                   gh release create v$VERSION "${assets[@]}" --title v$VERSION --target $REF
             - name: Delete workflow run
