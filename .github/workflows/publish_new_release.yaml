@@ -65,7 +65,7 @@ jobs:
                   assets=()
                   for f in $files; do [ -f "$f" ] && assets+=(-a "$f"); done
                   SHORT_SHA=$(echo $REF | cut -c 1-7)
-                  hub release create "${assets[@]}" -m v$VERSION -t $REF v$VERSION
+                  gh release create v$VERSION "${assets[@]}" --title v$VERSION --target $REF
             - name: Delete workflow run
               if: env.updated == 'false'
               run: |
