@@ -43,44 +43,45 @@ const main = (): void => {
     let isOfficial = false;
     new Promise(() => {
         const observer = new MutationObserver(() => {
-            const img = document.querySelector(
-                "img[src^='https://musescore.com/static/musescore/scoredata/g/']"
-            );
-            if (!img) {
-                if (
-                    document.querySelector(
-                        "meta[property='musescore:author'][content='Official Scores']"
-                    ) ||
-                    document.querySelector(
-                        "meta[property='musescore:author'][content='Official Author']"
-                    )
-                ) {
-                    if (!isOfficial) {
-                        isOfficial = true;
-                        const btnList = new BtnList();
-                        btnList.add({
-                            name: i18next.t("official_button"),
-                            action: BtnAction.openUrl(
-                                "https://musescore.com/upgrade"
-                            ),
-                            tooltip: i18next.t("official_tooltip"),
-                        });
-                        // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                        btnList.commit(BtnListMode.InPage);
-                    }
+            observer.disconnect();
+            const scoreinfo = new ScoreInfoInPage(document);
+            const btnList = new BtnList();
+            let indvPartBtn: HTMLButtonElement | null = null;
+            const fallback = () => {
+                // btns fallback to load from MSCZ file (`Individual Parts`)
+                return indvPartBtn?.click();
+            };
+
+            if (
+                document.querySelector(
+                    "meta[property='musescore:author'][content='Official Scores']"
+                ) ||
+                document.querySelector(
+                    "meta[property='musescore:author'][content='Official Author']"
+                )
+            ) {
+                const btnOffList = new BtnList();
+                if (!isOfficial) {
+                    isOfficial = true;
+                    btnOffList.add({
+                        name:
+                            i18next.t("download", { fileType: "PDF" }) +
+                            "\n(" +
+                            i18next.t("official_button") +
+                            ")",
+                        action: BtnAction.openUrl(
+                            "https://musescore.com/upgrade"
+                        ),
+                        tooltip: i18next.t("official_tooltip"),
+                    });
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                    btnOffList.commit(BtnListMode.InPage, 2);
                 }
             } else {
-                observer.disconnect();
-                const scoreinfo = new ScoreInfoInPage(document);
-                const btnList = new BtnList();
-                let indvPartBtn: HTMLButtonElement | null = null;
-                const fallback = () => {
-                    // btns fallback to load from MSCZ file (`Individual Parts`)
-                    return indvPartBtn?.click();
-                };
-
                 btnList.add({
-                    name: i18next.t("download", { fileType: "PDF" }),
+                    name: i18next.t("download", {
+                        fileType: "PDF",
+                    }),
                     action: BtnAction.process(
                         () =>
                             downloadPDF(
@@ -92,27 +93,27 @@ const main = (): void => {
                         3 * 60 * 1000 /* 3min */
                     ),
                 });
-
-                btnList.add({
-                    name: i18next.t("download", { fileType: "MIDI" }),
-                    action: BtnAction.download(
-                        () => getFileUrl(scoreinfo.id, "midi"),
-                        fallback,
-                        30 * 1000 /* 30s */
-                    ),
-                });
-
-                btnList.add({
-                    name: i18next.t("download", { fileType: "MP3" }),
-                    action: BtnAction.download(
-                        () => getFileUrl(scoreinfo.id, "mp3"),
-                        fallback,
-                        30 * 1000 /* 30s */
-                    ),
-                });
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                btnList.commit(BtnListMode.InPage);
             }
+
+            btnList.add({
+                name: i18next.t("download", { fileType: "MIDI" }),
+                action: BtnAction.download(
+                    () => getFileUrl(scoreinfo.id, "midi"),
+                    fallback,
+                    30 * 1000 /* 30s */
+                ),
+            });
+
+            btnList.add({
+                name: i18next.t("download", { fileType: "MP3" }),
+                action: BtnAction.download(
+                    () => getFileUrl(scoreinfo.id, "mp3"),
+                    fallback,
+                    30 * 1000 /* 30s */
+                ),
+            });
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            btnList.commit(BtnListMode.InPage, 1);
         });
         observer.observe(document, { childList: true, subtree: true });
     });

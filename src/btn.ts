@@ -144,18 +144,19 @@ export class BtnList {
 
     private _positionBtns(
         anchorDiv: HTMLDivElement,
-        newParent: HTMLDivElement
+        newParent: HTMLDivElement,
+        id: number
     ) {
         let { top } = anchorDiv.getBoundingClientRect();
         top += window.scrollY; // relative to the entire document instead of viewport
         if (top > 0) {
-            newParent.style.top = `${top}px`;
+            newParent.style.top = `${top - id * 48}px`;
         } else {
             newParent.style.top = "0px";
         }
     }
 
-    private _commit() {
+    private _commit(id: number) {
         const btnParent = document.querySelector(
             "div.react-container"
         ) as HTMLDivElement;
@@ -179,18 +180,19 @@ export class BtnList {
 
         const newParent = document.createElement("div");
         newParent.append(...this.list.map((e) => cloneBtn(e)));
-        isNew
+        newParent.id = id.toString();
+        !shadow.querySelector("div#id")
             ? shadow.append(newParent)
-            : shadow.replaceChild(newParent, shadow.querySelector("div")!);
+            : shadow.replaceChild(newParent, shadow.querySelector("div#id")!);
 
         // default position
         newParent.style.top = `${
-            window.innerHeight - newParent.getBoundingClientRect().height
+            window.innerHeight - newParent.getBoundingClientRect().height * id
         }px`;
 
         void onPageRendered(this.getBtnParent).then(
             (anchorDiv: HTMLDivElement) => {
-                const pos = () => this._positionBtns(anchorDiv, newParent);
+                const pos = () => this._positionBtns(anchorDiv, newParent, id);
                 pos();
                 if (isNew) {
                     // reposition btns when window resizes
@@ -209,22 +211,25 @@ export class BtnList {
     /**
      * replace the template button with the list of new buttons
      */
-    async commit(mode: BtnListMode = BtnListMode.InPage): Promise<void> {
+    async commit(
+        mode: BtnListMode = BtnListMode.InPage,
+        id: number
+    ): Promise<void> {
         switch (mode) {
             case BtnListMode.InPage: {
                 let el: Element;
                 try {
-                    el = this._commit();
+                    el = this._commit(id);
                 } catch {
                     // fallback to BtnListMode.ExtWindow
-                    return this.commit(BtnListMode.ExtWindow);
+                    return this.commit(BtnListMode.ExtWindow, id);
                 }
                 const observer = new MutationObserver(() => {
                     // check if the buttons are still in document when dom updates
                     if (!document.contains(el)) {
                         // re-commit
                         // performance issue?
-                        el = this._commit();
+                        el = this._commit(id);
                     }
                 });
                 observer.observe(document, { childList: true, subtree: true });
@@ -232,7 +237,7 @@ export class BtnList {
             }
 
             case BtnListMode.ExtWindow: {
-                const div = this._commit();
+                const div = this._commit(id);
                 const w = await windowOpenAsync(
                     undefined,
                     "",
