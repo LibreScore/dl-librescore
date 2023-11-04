@@ -43,7 +43,11 @@ const main = (): void => {
     let isOfficial = false;
     new Promise(() => {
         const observer = new MutationObserver(() => {
-            observer.disconnect();
+            const sub = Array.from(
+                document.querySelectorAll("#jmuse-scroller-component div")
+            ).some((img: HTMLDivElement) =>
+                img.innerText.startsWith("End of preview")
+            );
             const scoreinfo = new ScoreInfoInPage(document);
             const btnList = new BtnList();
             let indvPartBtn: HTMLButtonElement | null = null;
@@ -53,15 +57,17 @@ const main = (): void => {
             };
 
             if (
-                document.querySelector(
+                sub &&
+                (document.querySelector(
                     "meta[property='musescore:author'][content='Official Scores']"
                 ) ||
-                document.querySelector(
-                    "meta[property='musescore:author'][content='Official Author']"
-                )
+                    document.querySelector(
+                        "meta[property='musescore:author'][content='Official Author']"
+                    ))
             ) {
                 const btnOffList = new BtnList();
                 if (!isOfficial) {
+                    observer.disconnect();
                     isOfficial = true;
                     btnOffList.add({
                         name:
@@ -115,7 +121,13 @@ const main = (): void => {
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             btnList.commit(BtnListMode.InPage, 1);
         });
-        observer.observe(document, { childList: true, subtree: true });
+        observer.observe(
+            document.querySelector("#jmuse-scroller-component") ?? document,
+            {
+                childList: true,
+                subtree: true,
+            }
+        );
     });
 };
 

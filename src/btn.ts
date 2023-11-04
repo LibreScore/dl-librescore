@@ -150,7 +150,7 @@ export class BtnList {
         let { top } = anchorDiv.getBoundingClientRect();
         top += window.scrollY; // relative to the entire document instead of viewport
         if (top > 0) {
-            newParent.style.top = `${top - id * 48}px`;
+            newParent.style.top = `${top - (id - 1) * 48}px`;
         } else {
             newParent.style.top = "0px";
         }
