@@ -43,11 +43,16 @@ const main = (): void => {
     let isOfficial = false;
     new Promise(() => {
         const observer = new MutationObserver(() => {
-            const sub = Array.from(
+            let noSub = Array.from(
                 document.querySelectorAll("#jmuse-scroller-component div")
             ).some((img: HTMLDivElement) =>
                 img.innerText.startsWith("End of preview")
             );
+            if (!noSub) {
+                noSub = document.querySelector("#jmuse-scroller-component")
+                    ? false
+                    : true;
+            }
             const scoreinfo = new ScoreInfoInPage(document);
             const btnList = new BtnList();
             let indvPartBtn: HTMLButtonElement | null = null;
@@ -57,7 +62,7 @@ const main = (): void => {
             };
 
             if (
-                sub &&
+                noSub &&
                 (document.querySelector(
                     "meta[property='musescore:author'][content='Official Scores']"
                 ) ||
