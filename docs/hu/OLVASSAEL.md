@@ -2,7 +2,7 @@
 
 ‎[čeština](/docs/cs/PŘEČTĚTEMĚ.md) | ‎[English](/docs/en/README.md) | ‎[español](/docs/es/LÉAME.md) | ‎[français](/docs/fr/LISEZMOI.md) | ‎**magyar** | ‎[Melayu](/docs/ms/BACASAYA.md) | ‎[[+]](https://weblate.librescore.org/projects/librescore/docs)
 
-[//]: # "\+\_==!|!=_=!|!==_/+/ ***NE MÓDOSÍTS SEMMIT E SOR FELETT*** /+/^^+#|#+^+#|#+^^\+\"
+[//]: # "\+\_==!|!=_=!|!==_/+/ ***NE MÓDOSÍTS SEMMIT ETTŐL A SORTÓL FELJEBB*** /+/^^+#|#+^+#|#+^^\+\"
 
 # dl-librescore
 
@@ -34,8 +34,8 @@ Kotta letöltése
 
 ### App
 
-1. Menjen aa `app-librescore` tárhely [OLVASSAEL](https://github.com/LibreScore/app-librescore/blob/master/docs/hu/OLVASSAEL.md#telepítés) oldalára
-2. Kövesse a telepítési utasításokat az eszközödhöz
+1. Menjen a `app-librescore` tárhely [OLVASSAEL](https://github.com/LibreScore/app-librescore/blob/master/docs/hu/OLVASSAEL.md#telepítés) oldalára
+2. Kövesse a telepítési utasításokat az eszközéhez
 
 ### Userscript
 
@@ -47,7 +47,7 @@ Kotta letöltése
 
 1. Telepítse [Tampermonkey](https://www.tampermonkey.net)
 
-> Megjegyzés: Ha korábban már telepítetted a "musescore-downloader", "mcsz downloader", "mcsz downloader" vagy "musescore-dl" nevű script egy régebbi verzióját, távolítsd el a Tampermonkey kezelőfalról.
+> Megjegyzés: Ha korábban már telepítetted a "musescore-downloader", "mcsz downloader", "mcsz downloader" vagy "musescore-dl" nevű script egy régebbi verzióját, távolítsd el a Tampermonkey kezelőfaláról.
 
 2. Nyissa meg a legújabb [dl-librescore.user.js](https://github.com/LibreScore/dl-librescore/releases/latest/download/dl-librescore.user.js) fájlt
 3. Nyomja meg a Telepítés gombot
@@ -58,7 +58,7 @@ Kotta letöltése
 2. A Safariban, amikor egy dalt néz meg a MuseScore-on, érintse meg a <img src="https://help.apple.com/assets/61800C7E6EA4632586448084/61800C896EA463258644809A/en_US/01f5a9889bbecc202d8cbb3067a261ad.png" height="16">
 3. Érintse meg a LibreScore parancsot a bővítmény aktiválásához
 
-> Megjegyzés: Mielőtt futtathatna JavaScriptet egy parancsból, be kell kapcsolnia Szkriptek futtatásának engedélyezése lehetőséget.
+> Megjegyzés: Mielőtt futtathatna JavaScriptet egy parancsból, be kell kapcsolnia a Szkriptek futtatásának engedélyezése lehetőséget.
 >
 > 1. Válassza a Beállítások <img src="https://help.apple.com/assets/61800C7E6EA4632586448084/61800C896EA463258644809A/en_US/492fec5aff74dbdef9b526177c3804b4.png" height="16"> > Parancsok > Haladó menüpontot.
 > 2. Kapcsolja be a Szkriptek futtatásának engedélyezése lehetőséget.
@@ -67,7 +67,7 @@ Kotta letöltése
 
 1. Hozzon létre egy új könyvjelzőt (általában Ctrl+D)
 2. Írja be a `LibreScore` szót a Név mezőbe
-3. Írja be a következőt `javascript:(function () {let code = document.createElement('script');code.src = 'https://github.com/LibreScore/dl-librescore/releases/latest/download/dl-librescore.user.js';document.body.appendChild(code);}())` az URL mezőben
+3. Írja be a következőt `javascript:(function () {let code = document.createElement('script');code.src = 'https://github.com/LibreScore/dl-librescore/releases/latest/download/dl-librescore.user.js';document.body.appendChild(code);}())` az URL mezőbe
 4. Mentse el a könyvjelzőt
 5. Amikor egy dalt néz meg a MuseScore-on, kattintson a könyvjelzőre a bővítmény aktiválásához
 
