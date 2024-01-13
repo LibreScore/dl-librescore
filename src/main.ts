@@ -72,8 +72,6 @@ const main = (): void => {
             ) {
                 const btnOffList = new BtnList();
                 if (!isOfficial) {
-                    observer.disconnect();
-                    isOfficial = true;
                     btnOffList.add({
                         name:
                             i18next.t("download", { fileType: "PDF" }) +
@@ -89,6 +87,14 @@ const main = (): void => {
                     btnOffList.commit(BtnListMode.InPage, 2);
                 }
             } else {
+                observer.disconnect();
+                if (isOfficial) {
+                    document
+                        .querySelector(".js-page")!
+                        .shadowRoot!.querySelectorAll("#\\31, #\\32")
+                        .forEach((e) => e.remove());
+                    isOfficial = false;
+                }
                 btnList.add({
                     name: i18next.t("download", {
                         fileType: "PDF",
@@ -106,25 +112,28 @@ const main = (): void => {
                 });
             }
 
-            btnList.add({
-                name: i18next.t("download", { fileType: "MIDI" }),
-                action: BtnAction.download(
-                    () => getFileUrl(scoreinfo.id, "midi"),
-                    fallback,
-                    30 * 1000 /* 30s */
-                ),
-            });
+            if (!isOfficial) {
+                isOfficial = true;
+                btnList.add({
+                    name: i18next.t("download", { fileType: "MIDI" }),
+                    action: BtnAction.download(
+                        () => getFileUrl(scoreinfo.id, "midi"),
+                        fallback,
+                        30 * 1000 /* 30s */
+                    ),
+                });
 
-            btnList.add({
-                name: i18next.t("download", { fileType: "MP3" }),
-                action: BtnAction.download(
-                    () => getFileUrl(scoreinfo.id, "mp3"),
-                    fallback,
-                    30 * 1000 /* 30s */
-                ),
-            });
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            btnList.commit(BtnListMode.InPage, 1);
+                btnList.add({
+                    name: i18next.t("download", { fileType: "MP3" }),
+                    action: BtnAction.download(
+                        () => getFileUrl(scoreinfo.id, "mp3"),
+                        fallback,
+                        30 * 1000 /* 30s */
+                    ),
+                });
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                btnList.commit(BtnListMode.InPage, 1);
+            }
         });
         observer.observe(
             document.querySelector("#jmuse-scroller-component") ?? document,
