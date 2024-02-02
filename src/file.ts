@@ -8,7 +8,7 @@ import { magics } from "./file-magics";
 export type FileType = "img" | "mp3" | "midi";
 
 const getApiUrl = (id: number, type: FileType, index: number): string => {
-    return `/api/jmuse?id=${id}&type=${type}&index=${index}&v2=1`;
+    return `/api/jmuse?id=${id}&type=${type}&index=${index}`;
 };
 
 /**
@@ -26,9 +26,6 @@ const useBuiltinAuth = (type: FileType): string => {
 };
 
 const getApiAuth = async (type: FileType, index: number): Promise<string> => {
-    // eslint-disable-next-line no-void
-    void index; // unused
-
     if (isNodeJs) {
         // we cannot intercept API requests in Node.js (as no requests are sent), so go straightforward to the hard-coded tokens
         return useBuiltinAuth(type);
@@ -43,6 +40,9 @@ const getApiAuth = async (type: FileType, index: number): Promise<string> => {
                     const fsBtn = document.querySelector(
                         'button[title="Toggle Fullscreen"]'
                     ) as HTMLButtonElement;
+                    if (!fsBtn) {
+                        throw Error;
+                    }
                     const el =
                         fsBtn.parentElement?.parentElement?.querySelector(
                             "button"
@@ -51,6 +51,10 @@ const getApiAuth = async (type: FileType, index: number): Promise<string> => {
                     break;
                 }
                 case "mp3": {
+                    // Mobile doesn't support click() function, find another method
+                    if (navigator.userAgentData.mobile) {
+                        throw Error;
+                    }
                     const el = document.querySelector(
                         'button[title="Toggle Play"]'
                     ) as HTMLButtonElement;
@@ -58,9 +62,8 @@ const getApiAuth = async (type: FileType, index: number): Promise<string> => {
                     break;
                 }
                 case "img": {
-                    const imgE = document.querySelector("img[src*=score_]");
-                    const nextE = imgE?.parentElement?.nextElementSibling;
-                    if (nextE) nextE.scrollIntoView();
+                    // Use fallback until better method is found
+                    throw Error;
                     break;
                 }
             }
@@ -88,11 +91,19 @@ export const getFileUrl = async (
     const url = getApiUrl(id, type, index);
     const auth = await getApiAuth(type, index);
 
-    const r = await _fetch(url, {
+    let r = await _fetch(url, {
         headers: {
             Authorization: auth,
         },
     });
+
+    if (!r.ok) {
+        r = await _fetch(url + "&v2=1", {
+            headers: {
+                Authorization: auth,
+            },
+        });
+    }
 
     const { info } = await r.json();
     return info.url as string;
