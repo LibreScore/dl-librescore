@@ -3,13 +3,13 @@ import { hookNative } from "./anti-detection";
 import type { FileType } from "./file";
 
 const TYPE_REG = /type=(img|mp3|midi)/;
+// first page has different URL
+const INIT_PAGE_REG = /(score_0\.png@0|score_0\.svg)/;
+const INDEX_REG = /index=(\d+)/;
 
-/**
- * I know this is super hacky.
- */
-const magicHookConstr = (() => {
-    const l = {};
+export const auths = {};
 
+(() => {
     if (isNodeJs) {
         // noop in CLI
         return () => Promise.resolve("");
@@ -29,14 +29,20 @@ const magicHookConstr = (() => {
 
                     hookNative(w, "fetch", () => {
                         return function (url, init) {
-                            const token = init?.headers?.Authorization;
-                            if (typeof url === "string" && token) {
-                                const m = url.match(TYPE_REG);
-                                console.debug(url, token, m);
-                                if (m) {
+                            let token = init?.headers?.Authorization;
+                            if (
+                                typeof url === "string" &&
+                                (token || url.match(INIT_PAGE_REG))
+                            ) {
+                                let m = url.match(TYPE_REG);
+                                let i = url.match(INDEX_REG);
+                                if (m && i) {
+                                    // console.log(url, token, m[1], i[1]);
                                     const type = m[1];
-                                    // eslint-disable-next-line no-unused-expressions
-                                    l[type]?.(token);
+                                    const index = i[1];
+                                    auths[type + index] = token;
+                                } else if (url.match(INIT_PAGE_REG)) {
+                                    auths["img0"] = url;
                                 }
                             }
                             return fetch(url, init);
@@ -50,19 +56,4 @@ const magicHookConstr = (() => {
     } catch (err) {
         console.error(err);
     }
-
-    return async (type: FileType) => {
-        return new Promise<string>((resolve) => {
-            l[type] = (token) => {
-                resolve(token);
-                magics[type] = token;
-            };
-        });
-    };
 })();
-
-export const magics: Record<FileType, Promise<string>> = {
-    img: magicHookConstr("img"),
-    midi: magicHookConstr("midi"),
-    mp3: magicHookConstr("mp3"),
-};
