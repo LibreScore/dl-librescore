@@ -1,6 +1,6 @@
 {
   "name": "dl-librescore",
-  "version": "0.34.62",
+  "version": "0.35.0",
   "description": "Download sheet music",
   "main": "dist/main.user.js",
   "bin": "dist/cli.js",
@@ -37,6 +37,7 @@
     "detect-node": "^2.1.0",
     "i18next": "^21.8.5",
     "inquirer": "^8.2.4",
+    "md5": "^2.3.0",
     "node-fetch": "^2.6.7",
     "ora": "^5.4.1",
     "proxy-agent": "^5.0.0",
@@ -48,6 +49,7 @@
     "@rollup/plugin-json": "^4.1.0",
     "@types/file-saver": "^2.0.5",
     "@types/inquirer": "^8.2.1",
+    "@types/md5": "^2.3.5",
     "@types/pdfkit": "^0.12.6",
     "@types/yargs": "^17.0.10",
     "pdfkit": "git+https://github.com/LibreScore/pdfkit.git",
