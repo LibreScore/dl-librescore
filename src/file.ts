@@ -12,7 +12,7 @@ const getApiUrl = (id: number, type: FileType, index: number): string => {
 };
 
 const getApiAuth = (id: number, type: FileType, index: number): string => {
-    const suffix = ")?)";
+    const suffix = ",#&";
     const code = `${id}${type}${index}${suffix}`;
     return md5(code).slice(0, 4);
 };
