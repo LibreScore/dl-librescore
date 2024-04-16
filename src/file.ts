@@ -8,11 +8,14 @@ import { auths } from "./file-magics";
 export type FileType = "img" | "mp3" | "midi";
 
 const getSuffix = async (): Promise<string> => {
-    const suffixUrl = (
-        document.head.querySelector(
+    const suffixElement =
+        (document.head.querySelector(
             "link[href^='https://musescore.com/static/public/build/musescore_es6/20']"
-        ) as HTMLLinkElement
-    )?.href;
+        ) as HTMLLinkElement) ??
+        (document.head.querySelector(
+            "link[href^='https://musescore.com/static/public/build/musescore/20']"
+        ) as HTMLLinkElement);
+    const suffixUrl = suffixElement?.href;
     const suffixJs = await fetch(suffixUrl);
     return (await suffixJs.text()).match(
         '(?:.*)"(.+)"\\)\\.substr\\(0,4\\)'
