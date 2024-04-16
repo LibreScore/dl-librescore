@@ -7,13 +7,28 @@ import { auths } from "./file-magics";
 
 export type FileType = "img" | "mp3" | "midi";
 
+const getSuffix = async (): Promise<string> => {
+    const suffixUrl = (
+        document.head.querySelector(
+            "link[href^='https://musescore.com/static/public/build/musescore_es6/20']"
+        ) as HTMLLinkElement
+    )?.href;
+    const suffixJs = await fetch(suffixUrl);
+    return (await suffixJs.text()).match(
+        '(?:.*)"(.+)"\\)\\.substr\\(0,4\\)'
+    )?.[1]!;
+};
+
 const getApiUrl = (id: number, type: FileType, index: number): string => {
     return `/api/jmuse?id=${id}&type=${type}&index=${index}`;
 };
 
-const getApiAuth = (id: number, type: FileType, index: number): string => {
-    const suffix = "19!@37";
-    const code = `${id}${type}${index}${suffix}`;
+const getApiAuth = async (
+    id: number,
+    type: FileType,
+    index: number
+): Promise<string> => {
+    const code = `${id}${type}${index}${await getSuffix()}`;
     return md5(code).slice(0, 4);
 };
 
@@ -123,7 +138,7 @@ export const getFileUrl = async (
     _fetch = getFetch()
 ): Promise<string> => {
     const url = getApiUrl(id, type, index);
-    let auth = getApiAuth(id, type, index);
+    let auth = await getApiAuth(id, type, index);
 
     let r = await _fetch(url, {
         headers: {
