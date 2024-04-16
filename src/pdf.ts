@@ -39,7 +39,8 @@ const _exportPDFNode: _ExFn = async (imgURLs, imgType, dimensions) => {
 
 export const exportPDF = async (
     scoreinfo: ScoreInfo,
-    sheet: SheetInfo
+    sheet: SheetInfo,
+    scoreUrl = ""
 ): Promise<ArrayBuffer> => {
     const imgType = sheet.imgType;
     const pageCount = sheet.pageCount;
@@ -50,7 +51,7 @@ export const exportPDF = async (
             return sheet.thumbnailUrl;
         } else {
             // obtain image urls using the API
-            return getFileUrl(scoreinfo.id, "img", i);
+            return getFileUrl(scoreinfo.id, "img", scoreUrl, i);
         }
     });
     const sheetImgURLs = await Promise.all(rs);

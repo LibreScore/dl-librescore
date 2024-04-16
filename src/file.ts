@@ -7,15 +7,22 @@ import { auths } from "./file-magics";
 
 export type FileType = "img" | "mp3" | "midi";
 
-const getSuffix = async (): Promise<string> => {
-    const suffixElement =
-        (document.head.querySelector(
-            "link[href^='https://musescore.com/static/public/build/musescore_es6/20']"
-        ) as HTMLLinkElement) ??
-        (document.head.querySelector(
-            "link[href^='https://musescore.com/static/public/build/musescore/20']"
-        ) as HTMLLinkElement);
-    const suffixUrl = suffixElement?.href;
+const getSuffix = async (scoreUrl: string): Promise<string> => {
+    let suffixUrl;
+    if (scoreUrl !== "") {
+        suffixUrl = (await (await fetch(scoreUrl)).text()).match(
+            '<link href="(https://musescore.com/static/public/build/musescore(?:_es6)?/20.+?.js)"'
+        )?.[1]!;
+    } else {
+        const suffixElement =
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore_es6/20']"
+            ) as HTMLLinkElement) ??
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore/20']"
+            ) as HTMLLinkElement);
+        suffixUrl = suffixElement?.href;
+    }
     const suffixJs = await fetch(suffixUrl);
     return (await suffixJs.text()).match(
         '(?:.*)"(.+)"\\)\\.substr\\(0,4\\)'
@@ -29,9 +36,10 @@ const getApiUrl = (id: number, type: FileType, index: number): string => {
 const getApiAuth = async (
     id: number,
     type: FileType,
-    index: number
+    index: number,
+    scoreUrl: string
 ): Promise<string> => {
-    const code = `${id}${type}${index}${await getSuffix()}`;
+    const code = `${id}${type}${index}${await getSuffix(scoreUrl)}`;
     return md5(code).slice(0, 4);
 };
 
@@ -137,11 +145,12 @@ const getApiAuthNetwork = async (
 export const getFileUrl = async (
     id: number,
     type: FileType,
+    scoreUrl = "",
     index = 0,
     _fetch = getFetch()
 ): Promise<string> => {
     const url = getApiUrl(id, type, index);
-    let auth = await getApiAuth(id, type, index);
+    let auth = await getApiAuth(id, type, index, scoreUrl);
 
     let r = await _fetch(url, {
         headers: {

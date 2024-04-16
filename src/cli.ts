@@ -603,20 +603,32 @@ void (async () => {
                 switch (type) {
                     case "midi": {
                         fileExt = "mid";
-                        const fileUrl = await getFileUrl(scoreinfo.id, "midi");
+                        const fileUrl = await getFileUrl(
+                            scoreinfo.id,
+                            "midi",
+                            argv.input
+                        );
                         fileData = await fetchBuffer(fileUrl);
                         break;
                     }
                     case "mp3": {
                         fileExt = "mp3";
-                        const fileUrl = await getFileUrl(scoreinfo.id, "mp3");
+                        const fileUrl = await getFileUrl(
+                            scoreinfo.id,
+                            "mp3",
+                            argv.input
+                        );
                         fileData = await fetchBuffer(fileUrl);
                         break;
                     }
                     case "pdf": {
                         fileExt = "pdf";
                         fileData = Buffer.from(
-                            await exportPDF(scoreinfo, scoreinfo.sheet)
+                            await exportPDF(
+                                scoreinfo,
+                                scoreinfo.sheet,
+                                argv.input
+                            )
                         );
                         break;
                     }
