@@ -4,6 +4,7 @@
 import md5 from "md5";
 import { getFetch } from "./utils";
 import { auths } from "./file-magics";
+import fetch from "node-fetch";
 
 export type FileType = "img" | "mp3" | "midi";
 
@@ -85,7 +86,7 @@ const getApiAuthNetwork = async (
                         numPages = parentDiv.children.length - 3;
                         let i = 0;
 
-                        function scrollToNextChild() {
+                        function scrollToNextChild () {
                             let childDiv = parentDiv.children[i];
                             if (childDiv) {
                                 childDiv.scrollIntoView();
