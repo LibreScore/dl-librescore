@@ -5,5 +5,7 @@
     "download_audio": "下載 {{fileType}} 音頻",
     "button_parent_not_found": "找不到按鍵的上級",
     "download": "下載 {{fileType}}",
-    "official_tooltip": "官方樂譜需要訂閱 MuseScore Pro+（可免費試用）才能下載。"
+    "official_tooltip": "官方樂譜需要訂閱 MuseScore Pro+（可免費試用）才能下載。",
+    "cli_usage_hint": "用法: {{bin}} [options]",
+    "unknown_button_list_mode": "未知的按鈕清單模式"
 }
