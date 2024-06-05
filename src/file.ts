@@ -67,11 +67,11 @@ const getApiAuthNetwork = async (
                     if (!fsBtn) {
                         throw Error;
                     }
-                        const el =
-                            fsBtn.parentElement?.parentElement?.querySelector(
-                                "button"
-                            ) as HTMLButtonElement;
-                        el.click();
+                    const el =
+                        fsBtn.parentElement?.parentElement?.querySelector(
+                            "button"
+                        ) as HTMLButtonElement;
+                    el.click();
                     break;
                 }
                 case "mp3": {
