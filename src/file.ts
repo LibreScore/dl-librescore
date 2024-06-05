@@ -11,7 +11,7 @@ const getSuffix = async (scoreUrl: string): Promise<string> => {
     let suffixUrl;
     if (scoreUrl !== "") {
         suffixUrl = (await (await fetch(scoreUrl)).text()).match(
-            '<link href="(https://musescore.com/static/public/build/musescore(?:_es6)?/20.+?.js)"'
+            '<link href="(https://musescore.com/static/public/build/musescore.*?(?:_es6)?/20.+?.js)"'
         )?.[1]!;
     } else {
         const suffixElement =
@@ -20,6 +20,12 @@ const getSuffix = async (scoreUrl: string): Promise<string> => {
             ) as HTMLLinkElement) ??
             (document.head.querySelector(
                 "link[href^='https://musescore.com/static/public/build/musescore/20']"
+            ) as HTMLLinkElement) ??
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore_fonts_es6/20']"
+            ) as HTMLLinkElement) ??
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore_fonts/20']"
             ) as HTMLLinkElement);
         suffixUrl = suffixElement?.href;
     }
@@ -61,18 +67,18 @@ const getApiAuthNetwork = async (
                     if (!fsBtn) {
                         throw Error;
                     }
-                    const el =
-                        fsBtn.parentElement?.parentElement?.querySelector(
-                            "button"
-                        ) as HTMLButtonElement;
-                    el.click();
+                        const el =
+                            fsBtn.parentElement?.parentElement?.querySelector(
+                                "button"
+                            ) as HTMLButtonElement;
+                        el.click();
                     break;
                 }
                 case "mp3": {
                     const el = document.querySelector(
                         'button[title="Toggle Play"]'
                     ) as HTMLButtonElement;
-                    el.click();
+                        el.click();
                     break;
                 }
                 case "img": {
