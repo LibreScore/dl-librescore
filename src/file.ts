@@ -78,7 +78,7 @@ const getApiAuthNetwork = async (
                     const el = document.querySelector(
                         'button[title="Toggle Play"]'
                     ) as HTMLButtonElement;
-                        el.click();
+                    el.click();
                     break;
                 }
                 case "img": {
