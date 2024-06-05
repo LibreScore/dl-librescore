@@ -53,6 +53,7 @@ const main = (): void => {
                     ? false
                     : true;
             }
+            noSub = false;
             const scoreinfo = new ScoreInfoInPage(document);
             const btnList = new BtnList();
             let indvPartBtn: HTMLButtonElement | null = null;
