@@ -165,16 +165,25 @@ export const getFileUrl = async (
     });
 
     if (!r.ok) {
-        auth = await getApiAuthNetwork(type, index);
-        if (type === "img" && index === 0) {
-            // auth is the URL for the first page
-            r = await _fetch(auth);
-        } else {
-            r = await _fetch(url, {
-                headers: {
-                    Authorization: auth,
-                },
-            });
+        auth = md5(`${id}${type}${index}01000`).slice(0, 4);
+        r = await _fetch(url, {
+            headers: {
+                Authorization: auth,
+            },
+        });
+
+        if (!r.ok) {
+            auth = await getApiAuthNetwork(type, index);
+            if (type === "img" && index === 0) {
+                // auth is the URL for the first page
+                r = await _fetch(auth);
+            } else {
+                r = await _fetch(url, {
+                    headers: {
+                        Authorization: auth,
+                    },
+                });
+            }
         }
     }
 
