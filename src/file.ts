@@ -26,6 +26,12 @@ const getSuffix = async (scoreUrl: string): Promise<string> => {
             ) as HTMLLinkElement) ??
             (document.head.querySelector(
                 "link[href^='https://musescore.com/static/public/build/musescore_fonts/20']"
+            ) as HTMLLinkElement) ??
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore_offwhite_colours_es6/20']"
+            ) as HTMLLinkElement) ??
+            (document.head.querySelector(
+                "link[href^='https://musescore.com/static/public/build/musescore_offwhite_colours/20']"
             ) as HTMLLinkElement);
         suffixUrl = suffixElement?.href;
     }
