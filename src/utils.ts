@@ -35,12 +35,15 @@ export const getFetch = (): typeof fetch => {
                 // fix: Only absolute URLs are supported
                 input = "https://musescore.com" + input;
             }
-            init = Object.assign({
+            init = Object.assign(
+                {
                 headers: NODE_FETCH_HEADERS,
                 // Use the `HTTPS_PROXY` environment variable for no URL given
                 // see: https://github.com/TooTallNate/node-proxy-agent#proxy-agent
                 agent: new ProxyAgent(),
-            }, init);
+                },
+                init
+            );
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
             return nodeFetch(input, init);
         };
@@ -156,7 +159,7 @@ export const windowOpenAsync = (
 
 export const attachShadow = (el: Element): ShadowRoot => {
     return Element.prototype.attachShadow.call(el, {
-        mode: "open",
+        mode: "closed",
     }) as ShadowRoot;
 };
 
@@ -182,9 +185,10 @@ export const waitForDocumentLoaded = (): Promise<void> => {
 export const waitForSheetLoaded = (): Promise<void> => {
     return new Promise((resolve) => {
         const observer = new MutationObserver(() => {
-            const meta = document.querySelector(
-                "meta[property='og:type'][content='musescore:score']"
-            );
+            const meta =
+                document.querySelector(
+                    "#ELEMENT_ID_SCORE_DOWNLOAD_SECTION > section > button"
+                ) && document.querySelector("#jmuse-scroller-component div");
             if (meta) {
                 resolve();
                 observer.disconnect();

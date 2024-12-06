@@ -1,83 +1,155 @@
-div {
-    width: 422px;
-    right: 0;
-    margin: 0 18px 18px 0;
-
-    text-align: center;
-    align-items: center;
-    font-family: "Inter", "Helvetica neue", Helvetica, sans-serif;
-    position: absolute;
-    z-index: 9999;
-    background: #f6f6f6;
-    min-width: 230px;
-
-    /* pass the scroll event through the btns background */
-    pointer-events: none;
-}
-
-@media screen and (max-width: 950px) {
-    div {
-        width: auto !important;
+    section {
+        --msd-html-width: 330px;
+        --msd-html-height: 50px;
+        --msd-color-animation: msd-background-migration 3s ease alternate infinite;
+        --msd-color-background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        -webkit-tap-highlight-color: transparent;
+        font-family: Muse Sans, Inter, Helvetica neue, Helvetica, sans-serif;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+        -webkit-text-size-adjust: 100%;
+        font-synthesis: none;
+        color: #180036;
+        box-sizing: inherit;
+        /* margin-bottom: 12px; */
+        gap: 6px;
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
     }
-}
 
-button {
-    width: 178px !important;
-    min-width: 178px;
-    height: 40px;
+    button {
+        --msd-html-width: 330px;
+        --msd-html-height: 50px;
+        --msd-color-animation: msd-background-migration 3s ease alternate infinite;
+        --msd-color-background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        -webkit-tap-highlight-color: transparent;
+        outline: none;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+        -webkit-text-size-adjust: 100%;
+        font-synthesis: none;
+        color-scheme: light dark;
+        align-items: center;
+        -webkit-appearance: none;
+        border: 0;
+        box-sizing: border-box;
+        display: inline-flex;
+        flex-wrap: nowrap;
+        font-family: inherit;
+        line-height: 16px;
+        position: relative;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        vertical-align: baseline;
+        white-space: nowrap;
+        font-size: 16px;
+        height: 40px;
+        padding: 4px 12px;
+        border-radius: 100px;
+        align-self: center;
+        min-width: 188px !important;
+        margin: 0 !important;
+        cursor: pointer;
+        justify-content: center;
+        background: #0777f2;
+        color: #fff;
+    }
 
-    color: #fff;
-    background: #2e68c0;
+    @media (min-width: 962px) {
+        button {
+            min-width: 183px !important;
+        }
+    }
 
-    cursor: pointer;
-    pointer-events: auto;
+    @media (max-width: 767px) {
+        button {
+            min-width: calc(50% - 8px) !important;
+        }
+    }
 
-    margin-bottom: 8px;
-    margin-right: 8px;
-    padding: 4px 12px;
+    button:hover {
+        background: #1662c1;
+        transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), color, box-shadow;
+    }
 
-    justify-content: start;
-    align-self: center;
+    svg {
+        --msd-html-width: 330px;
+        --msd-html-height: 50px;
+        --msd-color-animation: msd-background-migration 3s ease alternate infinite;
+        --msd-color-background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        -webkit-tap-highlight-color: transparent;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+        -webkit-text-size-adjust: 100%;
+        font-synthesis: none;
+        color-scheme: light dark;
+        font-family: inherit;
+        line-height: 16px;
+        text-align: center;
+        user-select: none;
+        white-space: nowrap;
+        font-size: 16px;
+        cursor: pointer;
+        box-sizing: inherit;
+        background: no-repeat 50%;
+        display: inline-block;
+        height: 24px;
+        max-width: none;
+        min-width: 24px;
+        width: 24px;
+        fill: #fff;
+        color: #fff;
+        position: relative;
+        z-index: 2;
+        vertical-align: top;
+        margin-right: 4px;
+    }
 
-    font-size: 16px;
-    border-radius: 6px;
-    border: 0;
+    path {
+        --msd-html-width: 330px;
+        --msd-html-height: 50px;
+        --msd-color-animation: msd-background-migration 3s ease alternate infinite;
+        --msd-color-background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        -webkit-tap-highlight-color: transparent;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+        -webkit-text-size-adjust: 100%;
+        font-synthesis: none;
+        color-scheme: light dark;
+        font-family: inherit;
+        line-height: 16px;
+        text-align: center;
+        user-select: none;
+        white-space: nowrap;
+        font-size: 16px;
+        cursor: pointer;
+        box-sizing: inherit;
+        fill: #fff;
+        color: #fff;
+    }
 
-    display: inline-flex;
-    position: relative;
-
-    font-family: inherit;
-}
-
-/* fix `View in LibreScore` button text overflow */
-button:last-of-type {
-    width: unset !important;
-}
-
-button:hover {
-    background: #1a4f9f;
-}
-
-/* light theme btn */
-button.light {
-    color: #2e68c0;
-    background: #e1effe;
-}
-
-button.light:hover {
-    background: #c3ddfd;
-}
-
-svg {
-    display: inline-block;
-    margin-right: 5px;
-    width: 20px;
-    height: 20px;
-    margin-top: auto;
-    margin-bottom: auto;
-}
-
-span {
-    margin-top: auto;
-    margin-bottom: auto;
-}
+    span {
+        --msd-html-width: 330px;
+        --msd-html-height: 50px;
+        --msd-color-animation: msd-background-migration 3s ease alternate infinite;
+        --msd-color-background: linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82);
+        -webkit-tap-highlight-color: transparent;
+        font-variant-ligatures: none;
+        font-feature-settings: "liga" 0;
+        -webkit-text-size-adjust: 100%;
+        font-synthesis: none;
+        color-scheme: light dark;
+        font-family: inherit;
+        line-height: 16px;
+        text-align: center;
+        user-select: none;
+        white-space: nowrap;
+        font-size: 16px;
+        cursor: pointer;
+        color: #fff;
+        box-sizing: inherit;
+        position: relative;
+        z-index: 2;
+    }

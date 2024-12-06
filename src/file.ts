@@ -71,20 +71,59 @@ const getApiAuthNetwork = async (
                         'button[title="Toggle Fullscreen"]'
                     ) as HTMLButtonElement;
                     if (!fsBtn) {
-                        throw Error;
+                        // mobile device
+                        document
+                            .querySelector("button[title='Open Mixer']")
+                            ?.click();
+                        const observer = new MutationObserver(() => {
+                            if (
+                                document.querySelector(
+                                    "body > article[role='dialog']"
+                                )
+                            ) {
+                                let audioSources = document.querySelector(
+                                    "body > article[role='dialog'] select"
+                                );
+
+                                if (audioSources !== null) {
+                                    audioSources.querySelector(
+                                        "option[value='0']"
+                                    )?.selected = true;
+
+                                    audioSources.dispatchEvent(
+                                        new Event("change")
+                                    );
+                                }
+                                document
+                                    .querySelector(
+                                        "article[role='dialog'] header > button"
+                                    )
+                                    ?.click();
                     }
+                        });
+                        observer.observe(document.body, {
+                            childList: true,
+                            subtree: true,
+                        });
+                    } else {
                     const el =
                         fsBtn.parentElement?.parentElement?.querySelector(
                             "button"
                         ) as HTMLButtonElement;
                     el.click();
+                    }
                     break;
                 }
                 case "mp3": {
                     const el = document.querySelector(
                         'button[title="Toggle Play"]'
                     ) as HTMLButtonElement;
+                    if (!el) {
+                        // mobile device
+                        document.querySelector("#scorePlayButton")?.click();
+                    } else {
                     el.click();
+                    }
                     break;
                 }
                 case "img": {
@@ -171,7 +210,7 @@ export const getFileUrl = async (
     });
 
     if (!r.ok) {
-        auth = md5(`${id}${type}${index}01000`).slice(0, 4);
+        auth = md5(`${id}${type}${index}%3(3`).slice(0, 4);
         r = await _fetch(url, {
             headers: {
                 Authorization: auth,

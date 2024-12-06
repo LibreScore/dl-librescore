@@ -11,43 +11,28 @@ import i18nextInit, { i18next } from "./i18n/index";
 type BtnElement = HTMLButtonElement;
 
 export enum ICON {
-    DOWNLOAD = "M9.6 2.4h4.8V12h2.784l-5.18 5.18L6.823 12H9.6V2.4zM19.2 19.2H4.8v2.4h14.4v-2.4z",
-    LIBRESCORE = "m5.4837 4.4735v10.405c-1.25-0.89936-3.0285-0.40896-4.1658 0.45816-1.0052 0.76659-1.7881 2.3316-0.98365 3.4943 1 1.1346 2.7702 0.70402 3.8817-0.02809 1.0896-0.66323 1.9667-1.8569 1.8125-3.1814v-5.4822h8.3278v9.3865h9.6438v-2.6282h-6.4567v-12.417c-4.0064-0.015181-8.0424-0.0027-12.06-0.00676zm0.54477 2.2697h8.3278v1.1258h-8.3278v-1.1258z",
+    DOWNLOAD_TOP = "M9.479 4.225v7.073L8.15 9.954a.538.538 0 00-.756.766l2.214 2.213a.52.52 0 00.745 0l2.198-2.203a.526.526 0 10-.745-.745l-1.287 1.308V4.225a.52.52 0 00-1.041 0z",
+    DOWNLOAD_BOTTOM = "M16.25 11.516v5.209a.52.52 0 01-.521.52H4.27a.521.521 0 01-.521-.52v-5.209a.52.52 0 10-1.042 0v5.209a1.562 1.562 0 001.563 1.562h11.458a1.562 1.562 0 001.562-1.562v-5.209a.52.52 0 10-1.041 0z",
 }
 
-const getBtnContainer = (): HTMLDivElement => {
-    const els = [...document.querySelectorAll("span")];
-    const el = els.find((b) => {
-        const text = b?.textContent?.replace(/\s/g, "") || "";
-        return text.includes("Download") || text.includes("Print");
-    }) as HTMLDivElement | null;
-    const btnParent = el?.parentElement?.parentElement as
-        | HTMLDivElement
-        | undefined;
-    if (!btnParent || !(btnParent instanceof HTMLDivElement))
-        throw new Error(i18next.t("button_parent_not_found"));
-    return btnParent;
-};
-
-const buildDownloadBtn = (icon: ICON, lightTheme = false) => {
-    const btn = document.createElement("button");
+const buildDownloadBtn = () => {
+    const btn = document.createElement("button") as HTMLButtonElement;
     btn.type = "button";
-    if (lightTheme) btn.className = "light";
-
-    // build icon svg element
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    const svgPath = document.createElementNS(
+    btn.append(document.createElementNS("http://www.w3.org/2000/svg", "svg"));
+    btn.append(document.createElement("span"));
+    let btnSvg = btn.querySelector("svg")!;
+    btnSvg.setAttribute("viewBox", "0 0 20 20");
+    let svgPath = document.createElementNS(
         "http://www.w3.org/2000/svg",
         "path"
     );
-    svgPath.setAttribute("d", icon);
-    svgPath.setAttribute("fill", lightTheme ? "#2e68c0" : "#fff");
-    svg.append(svgPath);
-
-    const textNode = document.createElement("span");
-    btn.append(svg, textNode);
-
+    svgPath.setAttribute("d", ICON.DOWNLOAD_TOP);
+    svgPath.setAttribute("fill", "#fff");
+    btnSvg.append(svgPath);
+    svgPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    svgPath.setAttribute("d", ICON.DOWNLOAD_BOTTOM);
+    svgPath.setAttribute("fill", "#fff");
+    btnSvg.append(svgPath);
     return btn;
 };
 
@@ -56,32 +41,6 @@ const cloneBtn = (btn: HTMLButtonElement) => {
     n.onclick = btn.onclick;
     return n;
 };
-
-function getScrollParent(node: HTMLElement): HTMLElement {
-    if (node.scrollHeight > node.clientHeight) {
-        return node;
-    } else {
-        return getScrollParent(node.parentNode as HTMLElement);
-    }
-}
-
-function onPageRendered(getEl: () => HTMLElement) {
-    return new Promise<HTMLElement>((resolve) => {
-        const observer = new MutationObserver(() => {
-            try {
-                const el = getEl();
-                if (el) {
-                    observer.disconnect();
-                    resolve(el);
-                }
-            } catch {}
-        });
-        observer.observe(
-            document.querySelector("div > section") ?? document.body,
-            { childList: true, subtree: true }
-        );
-    });
-}
 
 interface BtnOptions {
     readonly name: string;
@@ -100,13 +59,8 @@ export enum BtnListMode {
 export class BtnList {
     private readonly list: BtnElement[] = [];
 
-    constructor(private getBtnParent: () => HTMLDivElement = getBtnContainer) {}
-
     add(options: BtnOptions): BtnElement {
-        const btnTpl = buildDownloadBtn(
-            options.icon ?? ICON.DOWNLOAD,
-            options.lightTheme
-        );
+        const btnTpl = buildDownloadBtn();
         const setText = (btn: BtnElement) => {
             const textNode = btn.querySelector("span");
             return (str: string): void => {
@@ -142,68 +96,23 @@ export class BtnList {
         return btnTpl;
     }
 
-    private _positionBtns(
-        anchorDiv: HTMLDivElement,
-        newParent: HTMLDivElement,
-        id: number
-    ) {
-        let { top } = anchorDiv.getBoundingClientRect();
-        top += window.scrollY; // relative to the entire document instead of viewport
-        if (top > 0) {
-            newParent.style.top = `${top - (id - 1) * 48}px`;
-        } else {
-            newParent.style.top = "0px";
-        }
-    }
-
-    private _commit(id: number) {
+    private _commit() {
         const btnParent = document.querySelector(
-            "div.react-container"
-        ) as HTMLDivElement;
-        let isNew = false;
-        let shadow = btnParent.shadowRoot;
-        if (!shadow) {
-            isNew = true;
-            shadow = attachShadow(btnParent);
-        }
+            "#ELEMENT_ID_SCORE_DOWNLOAD_SECTION > section"
+        ) as HTMLElement;
 
-        if (isNew) {
-            // style the shadow DOM
-            const style = document.createElement("style");
-            style.innerText = btnListCss;
-            shadow.append(style);
+        let shadow = attachShadow(btnParent);
 
-            // hide buttons using the shadow DOM
-            const slot = document.createElement("slot");
-            shadow.append(slot);
-        }
+        // Inject the collected styles into the shadow DOM
+        const style = document.createElement("style");
+        style.textContent = btnListCss;
+        shadow.appendChild(style);
 
-        const newParent = document.createElement("div");
-        newParent.append(...this.list.map((e) => cloneBtn(e)));
-        newParent.id = id.toString();
-        !shadow.querySelector("div#id")
-            ? shadow.append(newParent)
-            : shadow.replaceChild(newParent, shadow.querySelector("div#id")!);
+        // hide buttons using the shadow DOM
+        const slot = document.createElement("slot");
+        shadow.append(slot);
 
-        // default position
-        newParent.style.top = `${
-            window.innerHeight - newParent.getBoundingClientRect().height * id
-        }px`;
-
-        void onPageRendered(this.getBtnParent).then(
-            (anchorDiv: HTMLDivElement) => {
-                const pos = () => this._positionBtns(anchorDiv, newParent, id);
-                pos();
-                if (isNew) {
-                    // reposition btns when window resizes
-                    window.addEventListener("resize", pos, { passive: true });
-
-                    // reposition btns when scrolling
-                    const scroll = getScrollParent(anchorDiv);
-                    scroll.addEventListener("scroll", pos, { passive: true });
-                }
-            }
-        );
+        shadow.append(...this.list.map((e) => cloneBtn(e)));
 
         return btnParent;
     }
@@ -211,42 +120,11 @@ export class BtnList {
     /**
      * replace the template button with the list of new buttons
      */
-    async commit(
-        mode: BtnListMode = BtnListMode.InPage,
-        id: number
-    ): Promise<void> {
+    async commit(mode: BtnListMode = BtnListMode.InPage): Promise<void> {
         switch (mode) {
             case BtnListMode.InPage: {
                 let el: Element;
-                try {
-                    el = this._commit(id);
-                } catch {
-                    // fallback to BtnListMode.ExtWindow
-                    return this.commit(BtnListMode.ExtWindow, id);
-                }
-                const observer = new MutationObserver(() => {
-                    // check if the buttons are still in document when dom updates
-                    if (!document.contains(el)) {
-                        // re-commit
-                        // performance issue?
-                        el = this._commit(id);
-                    }
-                });
-                observer.observe(document, { childList: true, subtree: true });
-                break;
-            }
-
-            case BtnListMode.ExtWindow: {
-                const div = this._commit(id);
-                const w = await windowOpenAsync(
-                    undefined,
-                    "",
-                    undefined,
-                    "resizable,width=230,height=270"
-                );
-                // eslint-disable-next-line no-unused-expressions
-                w?.document.body.append(div);
-                window.addEventListener("unload", () => w?.close());
+                el = this._commit();
                 break;
             }
 

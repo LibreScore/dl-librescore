@@ -40,109 +40,79 @@ if (isGmAvailable("registerMenuCommand")) {
 const { saveAs } = FileSaver;
 
 const main = (): void => {
-    let isOfficial = false;
+    let isMobile = !document.querySelector('button[title="Toggle Fullscreen"]');
     new Promise(() => {
-        const observer = new MutationObserver(() => {
-            let noSub = Array.from(
-                document.querySelectorAll("#jmuse-scroller-component div")
-            ).some((img: HTMLDivElement) =>
-                img.innerText.startsWith("End of preview")
-            );
-            if (!noSub) {
-                noSub = document.querySelector("#jmuse-scroller-component")
-                    ? false
-                    : true;
-            }
-            noSub = false;
-            const scoreinfo = new ScoreInfoInPage(document);
-            const btnList = new BtnList();
-            let indvPartBtn: HTMLButtonElement | null = null;
-            const fallback = () => {
-                // btns fallback to load from MSCZ file (`Individual Parts`)
-                return indvPartBtn?.click();
-            };
+        let noSub = isMobile
+            ? document.querySelector("#jmuse-scroller-component")!
+                  .childElementCount <= 1
+            : Array.from([
+                  ...document.querySelectorAll("#jmuse-scroller-component div"),
+              ]).some((el: HTMLDivElement) =>
+                  el.innerText.startsWith("End of preview")
+              );
+        const scoreinfo = new ScoreInfoInPage(document);
+        const btnList = new BtnList();
+        let indvPartBtn: HTMLButtonElement | null = null;
+        const fallback = () => {
+            // btns fallback to load from MSCZ file (`Individual Parts`)
+            return indvPartBtn?.click();
+        };
 
-            if (
-                noSub &&
-                (document.querySelector(
-                    "meta[property='musescore:author'][content='Official Scores']"
-                ) ||
-                    document.querySelector(
-                        "meta[property='musescore:author'][content='Official Author']"
-                    ))
-            ) {
-                const btnOffList = new BtnList();
-                if (!isOfficial) {
-                    btnOffList.add({
-                        name:
-                            i18next.t("download", { fileType: "PDF" }) +
-                            "\n(" +
-                            i18next.t("official_button") +
-                            ")",
-                        action: BtnAction.openUrl(
-                            "https://musescore.com/upgrade"
+        if (
+            noSub &&
+            (document.querySelector(
+                "meta[property='musescore:author'][content='Official Scores']"
+            ) ||
+                document.querySelector(
+                    "meta[property='musescore:author'][content='Official Author']"
+                ))
+        ) {
+            btnList.add({
+                name:
+                    i18next.t("download", { fileType: "PDF" }) +
+                    "\n(" +
+                    i18next.t("official_button") +
+                    ")",
+                action: BtnAction.openUrl("https://musescore.com/upgrade"),
+                tooltip: i18next.t("official_tooltip"),
+            });
+        } else {
+            btnList.add({
+                name: i18next.t("download", {
+                    fileType: "PDF",
+                }),
+                action: BtnAction.process(
+                    () =>
+                        downloadPDF(
+                            scoreinfo,
+                            new SheetInfoInPage(document),
+                            saveAs
                         ),
-                        tooltip: i18next.t("official_tooltip"),
-                    });
-                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                    btnOffList.commit(BtnListMode.InPage, 2);
-                }
-            } else {
-                observer.disconnect();
-                if (isOfficial) {
-                    document
-                        .querySelector(".js-page")!
-                        .shadowRoot!.querySelectorAll("#\\31, #\\32")
-                        .forEach((e) => e.remove());
-                    isOfficial = false;
-                }
-                btnList.add({
-                    name: i18next.t("download", {
-                        fileType: "PDF",
-                    }),
-                    action: BtnAction.process(
-                        () =>
-                            downloadPDF(
-                                scoreinfo,
-                                new SheetInfoInPage(document),
-                                saveAs
-                            ),
-                        fallback,
-                        3 * 60 * 1000 /* 3min */
-                    ),
-                });
-            }
+                    fallback,
+                    3 * 60 * 1000 /* 3min */
+                ),
+            });
+        }
 
-            if (!isOfficial) {
-                isOfficial = true;
-                btnList.add({
-                    name: i18next.t("download", { fileType: "MIDI" }),
-                    action: BtnAction.download(
-                        () => getFileUrl(scoreinfo.id, "midi"),
-                        fallback,
-                        30 * 1000 /* 30s */
-                    ),
-                });
-
-                btnList.add({
-                    name: i18next.t("download", { fileType: "MP3" }),
-                    action: BtnAction.download(
-                        () => getFileUrl(scoreinfo.id, "mp3"),
-                        fallback,
-                        30 * 1000 /* 30s */
-                    ),
-                });
-                // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                btnList.commit(BtnListMode.InPage, 1);
-            }
+        btnList.add({
+            name: i18next.t("download", { fileType: "MIDI" }),
+            action: BtnAction.download(
+                () => getFileUrl(scoreinfo.id, "midi"),
+                fallback,
+                30 * 1000 /* 30s */
+            ),
         });
-        observer.observe(
-            document.querySelector("#jmuse-scroller-component") ?? document,
-            {
-                childList: true,
-                subtree: true,
-            }
-        );
+
+        btnList.add({
+            name: i18next.t("download", { fileType: "MP3" }),
+            action: BtnAction.download(
+                () => getFileUrl(scoreinfo.id, "mp3"),
+                fallback,
+                30 * 1000 /* 30s */
+            ),
+        });
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        btnList.commit(BtnListMode.InPage);
     });
 };
 
