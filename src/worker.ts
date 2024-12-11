@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+import isNodeJs from "detect-node";
 import PDFDocument from "pdfkit/lib/document";
 import SVGtoPDF from "svg-to-pdfkit";
 
@@ -107,11 +108,29 @@ export type PDFWorkerMessage = [string[], ImgType, number, number];
 if (typeof onmessage !== "undefined") {
     onmessage = async (e): Promise<void> => {
         const [imgUrls, imgType, width, height] = e.data as PDFWorkerMessage;
+        let imgBlobs;
 
-        const imgBlobs = await Promise.all(
-            imgUrls.map((url) => fetchBlob(url))
-        );
+        if (isNodeJs) {
+            imgBlobs = await Promise.all(imgUrls.map((url) => fetchBlob(url)));
+        } else {
+            let completedFetches = 0;
 
+            const sendProgress = () => {
+                const progress = Math.round(
+                    83 + (completedFetches / imgUrls.length) * 17
+                );
+                postMessage({ type: "fetchProgress", progress });
+            };
+
+            imgBlobs = await Promise.all(
+                imgUrls.map(async (url, i) => {
+                    const blob = await fetchBlob(url);
+                    completedFetches++;
+                    sendProgress();
+                    return blob;
+                })
+            );
+        }
         const pdfBuf = await generatePDF(imgBlobs, imgType, width, height);
 
         postMessage(pdfBuf, [pdfBuf]);

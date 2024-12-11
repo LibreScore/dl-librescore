@@ -82,12 +82,15 @@ const main = (): void => {
                     fileType: "PDF",
                 }),
                 action: BtnAction.process(
-                    () =>
-                        downloadPDF(
+                    async (_, setText): Promise<void> => {
+                        return downloadPDF(
                             scoreinfo,
                             new SheetInfoInPage(document),
-                            saveAs
-                        ),
+                            saveAs,
+                            setText
+                        );
+                    },
+
                     fallback,
                     3 * 60 * 1000 /* 3min */
                 ),
@@ -98,6 +101,7 @@ const main = (): void => {
             name: i18next.t("download", { fileType: "MIDI" }),
             action: BtnAction.download(
                 () => getFileUrl(scoreinfo.id, "midi"),
+                scoreinfo.fileName,
                 fallback,
                 30 * 1000 /* 30s */
             ),
@@ -107,6 +111,7 @@ const main = (): void => {
             name: i18next.t("download", { fileType: "MP3" }),
             action: BtnAction.download(
                 () => getFileUrl(scoreinfo.id, "mp3"),
+                scoreinfo.fileName,
                 fallback,
                 30 * 1000 /* 30s */
             ),

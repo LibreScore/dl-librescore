@@ -8,16 +8,23 @@ import { fetchBuffer } from "./utils";
 type _ExFn = (
     imgURLs: string[],
     imgType: "svg" | "png",
-    dimensions: Dimensions
+    dimensions: Dimensions,
+    setText?: (str: string) => void
 ) => Promise<ArrayBuffer>;
 
-const _exportPDFBrowser: _ExFn = async (imgURLs, imgType, dimensions) => {
+const _exportPDFBrowser: _ExFn = async (
+    imgURLs,
+    imgType,
+    dimensions,
+    setText
+) => {
     const worker = new PDFWorkerHelper();
     const pdfArrayBuffer = await worker.generatePDF(
         imgURLs,
         imgType,
         dimensions.width,
-        dimensions.height
+        dimensions.height,
+        setText
     );
     worker.terminate();
     return pdfArrayBuffer;
@@ -40,25 +47,38 @@ const _exportPDFNode: _ExFn = async (imgURLs, imgType, dimensions) => {
 export const exportPDF = async (
     scoreinfo: ScoreInfo,
     sheet: SheetInfo,
-    scoreUrl = ""
+    scoreUrl = "",
+    setText: (str: string) => void
 ): Promise<ArrayBuffer> => {
     const imgType = sheet.imgType;
     const pageCount = sheet.pageCount;
 
-    const rs = Array.from({ length: pageCount }).map((_, i) => {
+    const rs = Array.from({ length: pageCount }).map(async (_, i) => {
+        let url;
         if (i === 0) {
             // The url to the first page is static. We don't need to use API to obtain it.
-            return sheet.thumbnailUrl;
+            url = sheet.thumbnailUrl;
+            if (setText) {
+                setText(`${Math.round((1 / pageCount) * 83)}%`);
+            }
         } else {
             // obtain image urls using the API
-            return getFileUrl(scoreinfo.id, "img", scoreUrl, i);
+            url = await getFileUrl(
+                scoreinfo.id,
+                "img",
+                scoreUrl,
+                i,
+                undefined,
+                setText,
+                pageCount
+            );
         }
+        return url;
     });
     const sheetImgURLs = await Promise.all(rs);
-
     const args = [sheetImgURLs, imgType, sheet.dimensions] as const;
     if (!isNodeJs) {
-        return _exportPDFBrowser(...args);
+        return _exportPDFBrowser(...args, setText);
     } else {
         return _exportPDFNode(...args);
     }
@@ -68,14 +88,16 @@ let pdfBlob: Blob;
 export const downloadPDF = async (
     scoreinfo: ScoreInfo,
     sheet: SheetInfo,
-    saveAs: typeof import("file-saver").saveAs
+    saveAs: typeof import("file-saver").saveAs,
+    setText: (str: string) => void
 ): Promise<void> => {
     const name = scoreinfo.fileName;
     if (pdfBlob) {
         return saveAs(pdfBlob, `${name}.pdf`);
     }
 
-    const pdfArrayBuffer = await exportPDF(scoreinfo, sheet);
+    const pdfArrayBuffer = await exportPDF(scoreinfo, sheet, "", setText);
+    setText("100%");
 
     pdfBlob = new Blob([pdfArrayBuffer]);
     saveAs(pdfBlob, `${name}.pdf`);

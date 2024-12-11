@@ -12,10 +12,15 @@
 // @match        https://musescore.com/*/*
 // @match        https://s.musescore.com/*/*
 // @license      MIT
-// @copyright    Copyright (c) 2023 LibreScore
+// @copyright    Copyright (c) 2024 LibreScore
 // @grant        unsafeWindow
 // @grant        GM.registerMenuCommand
 // @grant        GM.addElement
 // @grant        GM.openInTab
+// @grant        GM.xmlHttpRequest
+// @connect      self
+// @connect      musescore.com
+// @connect      ultimate-guitar.com
+// @connect      *
 // @run-at       document-start
 // ==/UserScript==

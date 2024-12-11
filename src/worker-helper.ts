@@ -23,14 +23,32 @@ export class PDFWorkerHelper extends Worker {
         imgURLs: string[],
         imgType: "svg" | "png",
         width: number,
-        height: number
+        height: number,
+        setText?: (str: string) => void
     ): Promise<ArrayBuffer> {
         const msg: PDFWorkerMessage = [imgURLs, imgType, width, height];
         this.postMessage(msg);
+
         return new Promise((resolve) => {
-            this.addEventListener("message", (e) => {
-                resolve(e.data);
-            });
+            if (setText) {
+                const onProgress = (e: MessageEvent) => {
+                    if (e.data.type === "fetchProgress") {
+                        // Call the setText callback with the progress percentage
+                        setText(`${e.data.progress}%`);
+                    } else if (e.data instanceof ArrayBuffer) {
+                        // If the data is the final PDF buffer, resolve the promise
+                        resolve(e.data);
+
+                        // Remove the event listener once we have resolved the promise
+                        this.removeEventListener("message", onProgress);
+                    }
+                };
+                this.addEventListener("message", onProgress);
+            } else {
+                this.addEventListener("message", (e) => {
+                    resolve(e.data);
+                });
+            }
         });
     }
 }

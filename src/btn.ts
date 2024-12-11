@@ -152,6 +152,154 @@ export namespace BtnAction {
 
     export const download = (
         url: UrlInput,
+        fileName: string,
+        fallback?: () => Promisable<void>,
+        timeout?: number,
+        target?: "_blank"
+    ): BtnAction =>
+        process(
+            async (name, setText): Promise<void> => {
+                const _url = await normalizeUrlInput(url);
+
+                if (isGmAvailable("xmlHttpRequest")) {
+                    _GM.xmlHttpRequest({
+                        method: "GET",
+                        url: _url,
+                        headers: { Range: "bytes=0-0" },
+                        onload: function (response) {
+                            const headers = response.responseHeaders;
+                            const contentDisposition = headers
+                                .split("\n")
+                                .find((header) =>
+                                    header
+                                        .toLowerCase()
+                                        .startsWith("content-disposition")
+                                );
+
+                            if (contentDisposition) {
+                                const a = document.createElement("a");
+                                a.href = _url;
+                                a.download = fileName;
+                                if (target) a.target = target;
+                                a.dispatchEvent(new MouseEvent("click"));
+                            } else {
+                                fetch(_url)
+                                    .then((response) => {
+                                        if (!response.ok) {
+                                            throw new Error(
+                                                "Failed to fetch the file"
+                                            );
+                                        }
+                                        const contentLength =
+                                            response.headers.get(
+                                                "Content-Length"
+                                            );
+
+                                        if (!contentLength) {
+                                            return response.blob();
+                                        }
+
+                                        const contentType =
+                                            response.headers.get(
+                                                "Content-Type"
+                                            ) || "application/octet-stream";
+                                        const total = parseInt(
+                                            contentLength,
+                                            10
+                                        );
+                                        let loaded = 0;
+
+                                        const reader =
+                                            response.body!.getReader();
+
+                                        const stream = new ReadableStream({
+                                            start(controller) {
+                                                const percent = Math.round(
+                                                    (loaded / total) * 100
+                                                );
+                                                setText(`${percent}%`);
+
+                                                function push() {
+                                                    reader
+                                                        .read()
+                                                        .then(
+                                                            ({
+                                                                done,
+                                                                value,
+                                                            }) => {
+                                                                if (done) {
+                                                                    controller.close();
+                                                                    setText(
+                                                                        name
+                                                                    );
+                                                                    return;
+                                                                }
+
+                                                                loaded +=
+                                                                    value.byteLength;
+
+                                                                // Update progress
+                                                                const percent =
+                                                                    Math.round(
+                                                                        (loaded /
+                                                                            total) *
+                                                                            100
+                                                                    );
+                                                                setText(
+                                                                    `${percent}%`
+                                                                );
+
+                                                                controller.enqueue(
+                                                                    value
+                                                                );
+                                                                push();
+                                                            }
+                                                        );
+                                                }
+                                                push();
+                                            },
+                                        });
+                                        return new Response(stream)
+                                            .blob()
+                                            .then((blob) => {
+                                                return new Blob([blob], {
+                                                    type: contentType,
+                                                });
+                                            });
+                                    })
+                                    .then((blob) => {
+                                        // Create a blob URL
+                                        const blobUrl =
+                                            window.URL.createObjectURL(blob);
+
+                                        // Create a temporary <a> element
+                                        const a = document.createElement("a");
+                                        a.href = blobUrl;
+                                        a.download = fileName; // Set the desired filename
+                                        if (target) a.target = target;
+                                        a.dispatchEvent(
+                                            new MouseEvent("click")
+                                        );
+
+                                        window.URL.revokeObjectURL(blobUrl);
+                                    })
+                                    .catch((error) => {
+                                        console.error(
+                                            "Error downloading the file:",
+                                            error
+                                        );
+                                    });
+                            }
+                        },
+                    });
+                }
+            },
+            fallback,
+            timeout
+        );
+
+    export const openUrl = (
+        url: UrlInput,
         fallback?: () => Promisable<void>,
         timeout?: number,
         target?: "_blank"
@@ -169,10 +317,8 @@ export namespace BtnAction {
         );
     };
 
-    export const openUrl = download;
-
     export const process = (
-        fn: () => any,
+        fn: (btnName: string, setText: (str: string) => void) => any,
         fallback?: () => Promisable<void>,
         timeout = 0 /* 10min */
     ): BtnAction => {
@@ -183,7 +329,7 @@ export namespace BtnAction {
             setText(i18next.t("processing"));
 
             try {
-                await useTimeout(fn(), timeout);
+                await useTimeout(fn(name, setText), timeout);
                 setText(name);
             } catch (err) {
                 console.error(err);
