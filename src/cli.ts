@@ -18,7 +18,9 @@ import { InputFileFormat } from "webmscore/schemas";
     await i18nextInit;
 })();
 
-const inquirer: typeof import("inquirer") = require("inquirer");
+import { input, checkbox, confirm } from '@inquirer/prompts';
+
+
 const ora: typeof import("ora") = require("ora");
 const chalk: typeof import("chalk") = require("chalk");
 const yargs = require("yargs");
@@ -27,7 +29,7 @@ const argv: any = yargs(hideBin(process.argv))
     .usage(i18next.t("cli_usage_hint", { bin: "$0" }))
     .example(
         "$0 -i https://musescore.com/user/123/scores/456 -t mp3 -o " +
-            process.cwd(),
+        process.cwd(),
         i18next.t("cli_example_url")
     )
     .example(
@@ -98,7 +100,7 @@ const createSpinner = () => {
     }).start();
 };
 
-const checkboxValidate = (input: number[]) => {
+const checkboxValidate = (input) => {
     return input.length >= 1;
 };
 
@@ -114,11 +116,56 @@ const getOutputDir = async (defaultOutput: string) => {
     let dirNotExistsTries = 0;
     let lastTryDir: string | null = null;
 
-    const { output } = await inquirer.prompt<Params>({
-        type: "input",
-        name: "output",
+    // const { output } = await inquirer.prompt<Params>({
+    //     type: "input",
+    //     name: "output",
+    //     message: i18next.t("cli_output_message"),
+    //     async validate (input: string) {
+    //         if (!input) return false;
+
+    //         const dirExists = fs.existsSync(input);
+
+    //         if (!dirExists) {
+    //             if (lastTryDir !== input) {
+    //                 lastTryDir = input;
+    //                 dirNotExistsTries = 0;
+    //             }
+
+    //             dirNotExistsTries++;
+
+    //             if (dirNotExistsTries >= 2) {
+    //                 fs.mkdirSync(input, { recursive: true });
+    //             } else {
+    //                 try {
+    //                     fs.accessSync(input);
+    //                 } catch (e) {
+    //                     return (
+    //                         `${e.message}` +
+    //                         "\n   " +
+    //                         `${chalk.bold(i18next.t("cli_confirm_message"))}` +
+    //                         `${chalk.dim(" (Enter ↵)")}`
+    //                     );
+    //                 }
+    //             }
+    //         } else if (!fs.statSync(input).isDirectory()) return false;
+
+    //         dirNotExistsTries = 0;
+
+    //         try {
+    //             fs.accessSync(input);
+    //         } catch (e) {
+    //             return e.message;
+    //         }
+
+    //         return true;
+    //     },
+    //     default: defaultOutput,
+    // });
+
+    const output = await input({
         message: i18next.t("cli_output_message"),
-        async validate(input: string) {
+        default: defaultOutput,
+        validate: async (input: string) => {
             if (!input) return false;
 
             const dirExists = fs.existsSync(input);
@@ -156,8 +203,7 @@ const getOutputDir = async (defaultOutput: string) => {
             }
 
             return true;
-        },
-        default: defaultOutput,
+        }
     });
 
     return output;
@@ -199,23 +245,40 @@ void (async () => {
         } // For MacOS, no hint is needed because the paste shortcut is universal.
 
         // ask for the page url or path to local file
-        const { fileInit } = await inquirer.prompt<Params>({
-            type: "input",
-            name: "fileInit",
+        // const { fileInit } = await inquirer.prompt<Params>({
+        //     type: "input",
+        //     name: "fileInit",
+        //     message: i18next.t("cli_input_message"),
+        //     suffix:
+        //         "\n  (" +
+        //         i18next.t("cli_input_suffix") +
+        //         `) ${chalk.bgGray(pasteMessage)}\n `,
+        //     validate (input: string) {
+        //         return (
+        //             input &&
+        //             (!!input.match(SCORE_URL_REG) ||
+        //                 fs.statSync(input).isFile() ||
+        //                 fs.statSync(input).isDirectory())
+        //         );
+        //     },
+        //     default: argv.input,
+        // });
+
+        // TODO, 缺少suffix提示
+        const fileInit = await input({
             message: i18next.t("cli_input_message"),
-            suffix:
-                "\n  (" +
-                i18next.t("cli_input_suffix") +
-                `) ${chalk.bgGray(pasteMessage)}\n `,
-            validate(input: string) {
+            default: argv.input,
+            validate: (input: string) => {
+                if (!input) return false;
                 return (
-                    input &&
-                    (!!input.match(SCORE_URL_REG) ||
-                        fs.statSync(input).isFile() ||
-                        fs.statSync(input).isDirectory())
+                    !!input.match(SCORE_URL_REG) ||
+                    fs.statSync(input).isFile() ||
+                    fs.statSync(input).isDirectory()
                 );
             },
-            default: argv.input,
+            // transformer: (input: string) => {
+            //     return `${input} ${chalk.bgGray(pasteMessage)}`;
+            // }
         });
 
         argv.input = fileInit;
@@ -274,15 +337,24 @@ void (async () => {
                 }));
                 // filetype selection
                 spinner.stop();
-                types = await inquirer.prompt<Params>({
-                    type: "checkbox",
-                    name: "types",
+
+                // types = await inquirer.prompt<Params>({
+                //     type: "checkbox",
+                //     name: "types",
+                //     message: i18next.t("cli_types_message"),
+                //     choices: typeChoices,
+                //     validate: checkboxValidate,
+                //     pageSize: Infinity,
+                //     default: types,
+                // });
+
+                types = await checkbox({
                     message: i18next.t("cli_types_message"),
                     choices: typeChoices,
                     validate: checkboxValidate,
                     pageSize: Infinity,
-                    default: types,
                 });
+
                 spinner.start();
 
                 types = types.types;
@@ -397,14 +469,23 @@ void (async () => {
 
                     // part selection
                     spinner.stop();
-                    parts = await inquirer.prompt<Params>({
-                        type: "checkbox",
-                        name: "parts",
+
+                    // parts = await inquirer.prompt<Params>({
+                    //     type: "checkbox",
+                    //     name: "parts",
+                    //     message: i18next.t("cli_parts_message"),
+                    //     choices: partChoices,
+                    //     validate: checkboxValidate,
+                    //     pageSize: Infinity,
+                    // });
+
+                    parts = await checkbox({
                         message: i18next.t("cli_parts_message"),
                         choices: partChoices,
                         validate: checkboxValidate,
                         pageSize: Infinity,
                     });
+
                     spinner.start();
                     // console.log(parts);
                     parts = partChoices.filter((e) =>
@@ -431,15 +512,25 @@ void (async () => {
                     }));
                     // filetype selection
                     spinner.stop();
-                    types = await inquirer.prompt<Params>({
-                        type: "checkbox",
-                        name: "types",
+
+                    // types = await inquirer.prompt<Params>({
+                    //     type: "checkbox",
+                    //     name: "types",
+                    //     message: i18next.t("cli_types_message"),
+                    //     choices: typeChoices,
+                    //     validate: checkboxValidate,
+                    //     pageSize: Infinity,
+                    //     default: types,
+                    // });
+
+                    // TODO: 重复的代码
+                    types = await checkbox({
                         message: i18next.t("cli_types_message"),
                         choices: typeChoices,
                         validate: checkboxValidate,
                         pageSize: Infinity,
-                        default: types,
                     });
+
                     spinner.start();
 
                     types = types.types;
@@ -530,18 +621,26 @@ void (async () => {
         if (isInteractive) {
             // confirmation
             spinner.stop();
-            const { confirmed } = await inquirer.prompt<Params>({
-                type: "confirm",
-                name: "confirmed",
+
+            // const { confirmed } = await inquirer.prompt<Params>({
+            //     type: "confirm",
+            //     name: "confirmed",
+            //     message: i18next.t("cli_confirm_message"),
+            //     prefix:
+            //         `${chalk.yellow("!")} ` +
+            //         i18next.t("id", { id: scoreinfo.id }) +
+            //         "\n  " +
+            //         i18next.t("title", { title: scoreinfo.title }) +
+            //         "\n ",
+            //     default: true,
+            // });
+
+            // TODO, 缺少prefix提示
+            const confirmed = await confirm({
                 message: i18next.t("cli_confirm_message"),
-                prefix:
-                    `${chalk.yellow("!")} ` +
-                    i18next.t("id", { id: scoreinfo.id }) +
-                    "\n  " +
-                    i18next.t("title", { title: scoreinfo.title }) +
-                    "\n ",
                 default: true,
             });
+
             if (!confirmed) return;
 
             // print a blank line
@@ -553,10 +652,10 @@ void (async () => {
                 spinner.stop();
                 console.log(
                     `${chalk.yellow("!")} ` +
-                        i18next.t("id", { id: scoreinfo.id }) +
-                        "\n  " +
-                        i18next.t("title", { title: scoreinfo.title }) +
-                        "\n "
+                    i18next.t("id", { id: scoreinfo.id }) +
+                    "\n  " +
+                    i18next.t("title", { title: scoreinfo.title }) +
+                    "\n "
                 );
                 spinner.start();
             }
@@ -568,15 +667,24 @@ void (async () => {
         if (isInteractive) {
             // filetype selection
             spinner.stop();
-            types = await inquirer.prompt<Params>({
-                type: "checkbox",
-                name: "types",
+
+            // types = await inquirer.prompt<Params>({
+            //     type: "checkbox",
+            //     name: "types",
+            //     message: i18next.t("cli_types_message"),
+            //     choices: ["midi", "mp3", "pdf"],
+            //     validate: checkboxValidate,
+            //     pageSize: Infinity,
+            //     default: types,
+            // });
+
+            types = await checkbox({
                 message: i18next.t("cli_types_message"),
                 choices: ["midi", "mp3", "pdf"],
                 validate: checkboxValidate,
                 pageSize: Infinity,
-                default: types,
             });
+
             types = types.types;
 
             // output directory
