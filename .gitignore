@@ -69,3 +69,5 @@ dist/
 
 .vscode/
 .vscode/**
+
+bun.lock
