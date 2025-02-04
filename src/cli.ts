@@ -13,13 +13,11 @@ import { getFileUrl } from "./file";
 import { exportPDF } from "./pdf";
 import i18nextInit, { i18next } from "./i18n/index";
 import { InputFileFormat } from "webmscore/schemas";
+import { input, checkbox, confirm } from '@inquirer/prompts';
 
 (async () => {
     await i18nextInit;
 })();
-
-import { input, checkbox, confirm } from '@inquirer/prompts';
-
 
 const ora: typeof import("ora") = require("ora");
 const chalk: typeof import("chalk") = require("chalk");
@@ -116,52 +114,6 @@ const getOutputDir = async (defaultOutput: string) => {
     let dirNotExistsTries = 0;
     let lastTryDir: string | null = null;
 
-    // const { output } = await inquirer.prompt<Params>({
-    //     type: "input",
-    //     name: "output",
-    //     message: i18next.t("cli_output_message"),
-    //     async validate (input: string) {
-    //         if (!input) return false;
-
-    //         const dirExists = fs.existsSync(input);
-
-    //         if (!dirExists) {
-    //             if (lastTryDir !== input) {
-    //                 lastTryDir = input;
-    //                 dirNotExistsTries = 0;
-    //             }
-
-    //             dirNotExistsTries++;
-
-    //             if (dirNotExistsTries >= 2) {
-    //                 fs.mkdirSync(input, { recursive: true });
-    //             } else {
-    //                 try {
-    //                     fs.accessSync(input);
-    //                 } catch (e) {
-    //                     return (
-    //                         `${e.message}` +
-    //                         "\n   " +
-    //                         `${chalk.bold(i18next.t("cli_confirm_message"))}` +
-    //                         `${chalk.dim(" (Enter ↵)")}`
-    //                     );
-    //                 }
-    //             }
-    //         } else if (!fs.statSync(input).isDirectory()) return false;
-
-    //         dirNotExistsTries = 0;
-
-    //         try {
-    //             fs.accessSync(input);
-    //         } catch (e) {
-    //             return e.message;
-    //         }
-
-    //         return true;
-    //     },
-    //     default: defaultOutput,
-    // });
-
     const output = await input({
         message: i18next.t("cli_output_message"),
         default: defaultOutput,
@@ -244,29 +196,10 @@ void (async () => {
             pasteMessage = i18next.t("cli_linux_paste_hint");
         } // For MacOS, no hint is needed because the paste shortcut is universal.
 
-        // ask for the page url or path to local file
-        // const { fileInit } = await inquirer.prompt<Params>({
-        //     type: "input",
-        //     name: "fileInit",
-        //     message: i18next.t("cli_input_message"),
-        //     suffix:
-        //         "\n  (" +
-        //         i18next.t("cli_input_suffix") +
-        //         `) ${chalk.bgGray(pasteMessage)}\n `,
-        //     validate (input: string) {
-        //         return (
-        //             input &&
-        //             (!!input.match(SCORE_URL_REG) ||
-        //                 fs.statSync(input).isFile() ||
-        //                 fs.statSync(input).isDirectory())
-        //         );
-        //     },
-        //     default: argv.input,
-        // });
-
-        // TODO, 缺少suffix提示
         const fileInit = await input({
-            message: i18next.t("cli_input_message"),
+            message: `${i18next.t("cli_input_message")}
+  (${i18next.t("cli_input_suffix")}) ${chalk.bgGray(pasteMessage)}
+`,
             default: argv.input,
             validate: (input: string) => {
                 if (!input) return false;
@@ -276,9 +209,6 @@ void (async () => {
                     fs.statSync(input).isDirectory()
                 );
             },
-            // transformer: (input: string) => {
-            //     return `${input} ${chalk.bgGray(pasteMessage)}`;
-            // }
         });
 
         argv.input = fileInit;
@@ -338,26 +268,13 @@ void (async () => {
                 // filetype selection
                 spinner.stop();
 
-                // types = await inquirer.prompt<Params>({
-                //     type: "checkbox",
-                //     name: "types",
-                //     message: i18next.t("cli_types_message"),
-                //     choices: typeChoices,
-                //     validate: checkboxValidate,
-                //     pageSize: Infinity,
-                //     default: types,
-                // });
-
                 types = await checkbox({
                     message: i18next.t("cli_types_message"),
                     choices: typeChoices,
                     validate: checkboxValidate,
-                    pageSize: Infinity,
                 });
 
                 spinner.start();
-
-                types = types.types;
 
                 // output directory
                 spinner.stop();
@@ -482,7 +399,7 @@ void (async () => {
                     parts = await checkbox({
                         message: i18next.t("cli_parts_message"),
                         choices: partChoices,
-                        validate: checkboxValidate,
+                        // validate: checkboxValidate,
                         pageSize: Infinity,
                     });
 
@@ -513,27 +430,14 @@ void (async () => {
                     // filetype selection
                     spinner.stop();
 
-                    // types = await inquirer.prompt<Params>({
-                    //     type: "checkbox",
-                    //     name: "types",
-                    //     message: i18next.t("cli_types_message"),
-                    //     choices: typeChoices,
-                    //     validate: checkboxValidate,
-                    //     pageSize: Infinity,
-                    //     default: types,
-                    // });
-
                     // TODO: 重复的代码
                     types = await checkbox({
                         message: i18next.t("cli_types_message"),
                         choices: typeChoices,
                         validate: checkboxValidate,
-                        pageSize: Infinity,
                     });
 
                     spinner.start();
-
-                    types = types.types;
                 }
 
                 filetypes = types.map((i) => INDV_DOWNLOADS[i]);
@@ -622,22 +526,10 @@ void (async () => {
             // confirmation
             spinner.stop();
 
-            // const { confirmed } = await inquirer.prompt<Params>({
-            //     type: "confirm",
-            //     name: "confirmed",
-            //     message: i18next.t("cli_confirm_message"),
-            //     prefix:
-            //         `${chalk.yellow("!")} ` +
-            //         i18next.t("id", { id: scoreinfo.id }) +
-            //         "\n  " +
-            //         i18next.t("title", { title: scoreinfo.title }) +
-            //         "\n ",
-            //     default: true,
-            // });
-
-            // TODO, 缺少prefix提示
             const confirmed = await confirm({
-                message: i18next.t("cli_confirm_message"),
+                message: `${i18next.t("id", { id: scoreinfo.id })}
+  ${i18next.t("title", { title: scoreinfo.title })}
+  ${i18next.t("cli_confirm_message")}`,
                 default: true,
             });
 
@@ -668,24 +560,11 @@ void (async () => {
             // filetype selection
             spinner.stop();
 
-            // types = await inquirer.prompt<Params>({
-            //     type: "checkbox",
-            //     name: "types",
-            //     message: i18next.t("cli_types_message"),
-            //     choices: ["midi", "mp3", "pdf"],
-            //     validate: checkboxValidate,
-            //     pageSize: Infinity,
-            //     default: types,
-            // });
-
             types = await checkbox({
                 message: i18next.t("cli_types_message"),
                 choices: ["midi", "mp3", "pdf"],
                 validate: checkboxValidate,
-                pageSize: Infinity,
             });
-
-            types = types.types;
 
             // output directory
             const output = await getOutputDir(argv.output);
