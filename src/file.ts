@@ -14,32 +14,9 @@ const getSuffix = async (scoreUrl: string): Promise<string> => {
             '<link href="(https://musescore.com/static/public/build/musescore.*?(?:_es6)?/20.+?.js)"'
         )?.[1]!;
     } else {
-        const suffixElement =
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_es6/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_fonts_es6/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_fonts/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_font_es6/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_font/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_offwhite_colours_es6/20']"
-            ) as HTMLLinkElement) ??
-            (document.head.querySelector(
-                "link[href^='https://musescore.com/static/public/build/musescore_offwhite_colours/20']"
-            ) as HTMLLinkElement);
-        suffixUrl = suffixElement?.href;
+        suffixUrl = document.head.innerHTML.match(
+            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/
+        )?.[1];
     }
     const suffixJs = await fetch(suffixUrl);
     return (await suffixJs.text()).match(
