@@ -17,7 +17,32 @@ declare const GM: {
         tagName: K,
         properties: Record<string, any>
     ): Promise<HTMLElementTagNameMap[K]>;
+
+    /** https://www.tampermonkey.net/documentation.php#GM_xmlhttpRequest */
+    xmlHttpRequest(details: GMXMLHttpRequestOptions): { abort: () => void };
 };
+
+export interface GMXMLHttpRequestOptions {
+    method: string;
+    url: string;
+    headers?: Record<string, string>;
+    data?: string;
+    responseType?: "arraybuffer" | "blob" | "json" | "text";
+    timeout?: number;
+    onload?: (response: GMXMLHttpRequestResponse) => void;
+    onerror?: (error: any) => void;
+    onprogress?: (progress: ProgressEvent) => void;
+}
+
+export interface GMXMLHttpRequestResponse {
+    readyState: number;
+    responseHeaders: string;
+    responseText: string;
+    status: number;
+    statusText: string;
+    finalUrl: string;
+}
+
 export const _GM = (typeof GM === "object" ? GM : undefined) as GM;
 
 type GM = typeof GM;
