@@ -202,8 +202,8 @@ if (isInteractive) {
             if (!input) return false;
             return (
                 !!input.match(SCORE_URL_REG) ||
-                fs.statSync(input).isFile() ||
-                fs.statSync(input).isDirectory()
+                (fs.existsSync(input) && fs.statSync(input).isFile()) ||
+                (fs.existsSync(input) && fs.statSync(input).isDirectory())
             );
         },
     });
@@ -384,26 +384,17 @@ if (isFile || isDir) {
                 // part selection
                 spinner.stop();
 
-                // parts = await inquirer.prompt<Params>({
-                //     type: "checkbox",
-                //     name: "parts",
-                //     message: i18next.t("cli_parts_message"),
-                //     choices: partChoices,
-                //     validate: checkboxValidate,
-                //     pageSize: Infinity,
-                // });
-
                 parts = await checkbox({
                     message: i18next.t("cli_parts_message"),
                     choices: partChoices,
-                    // validate: checkboxValidate,
-                    pageSize: Infinity,
+                    validate: checkboxValidate,
                 });
-
-                spinner.start();
+                // console.log(partChoices)
                 // console.log(parts);
+                spinner.start();
+
                 parts = partChoices.filter((e) =>
-                    parts.parts.includes(e.value)
+                    parts.includes(e.value)
                 );
                 // console.log(parts);
             } else {
