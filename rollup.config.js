@@ -1,7 +1,7 @@
-import typescript from "rollup-plugin-typescript";
+import typescript from "@rollup/plugin-typescript";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
-import builtins from "@crokita/rollup-plugin-node-builtins";
+import builtins from "rollup-plugin-polyfill-node";
 import nodeGlobals from "rollup-plugin-node-globals";
 import json from "@rollup/plugin-json";
 import { string } from "rollup-plugin-string";
@@ -33,7 +33,8 @@ const basePlugins = [
         extensions: [".js", ".ts"],
     }),
     commonjs({
-        extensions: [".js", ".ts"],
+        include: "node_modules/**",
+        transformMixedEsModules: true,
     }),
     json(),
     string({
@@ -95,7 +96,7 @@ export default [
         input: "src/cli.ts",
         output: {
             file: "dist/cli.js",
-            format: "cjs",
+            format: "es",
             banner: "#!/usr/bin/env node",
             sourcemap: false,
         },
