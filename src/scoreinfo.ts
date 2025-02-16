@@ -119,7 +119,7 @@ export class SheetInfoInPage extends SheetInfo {
     }
 
     private get sheet0Img(): HTMLImageElement | null {
-        return this.document.querySelector("img[src*=score_]");
+        return this.document.querySelector("img[src*=score_0]");
     }
 
     get pageCount(): number {
