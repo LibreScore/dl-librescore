@@ -41,6 +41,17 @@ const { saveAs } = FileSaver;
 
 const main = (): void => {
     let isMobile = !document.querySelector('button[title="Toggle Fullscreen"]');
+    if (isMobile) {
+        const parentDiv = document.querySelector("#jmuse-layout");
+        const divs = parentDiv!.querySelectorAll("div");
+        const validDiv = [...divs].find(
+            (div) => div.querySelectorAll("button").length === 3
+        );
+
+        if (validDiv) {
+            isMobile = false;
+        }
+    }
     new Promise(() => {
         let noSub = isMobile
             ? document.querySelector("#jmuse-scroller-component")!
