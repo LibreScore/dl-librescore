@@ -11,11 +11,11 @@ const getSuffix = async (scoreUrl: string): Promise<string> => {
     let suffixUrl;
     if (scoreUrl !== "") {
         suffixUrl = (await (await fetch(scoreUrl)).text()).match(
-            '<link href="(https://musescore.com/static/public/build/musescore.*?(?:_es6)?/20.+?.js)"'
+            'link href="(https://musescore.com/static/public/build/musescore.*?(?:_es6)?/20.+?/\\d.+?.js)"'
         )?.[1]!;
     } else {
         suffixUrl = document.head.innerHTML.match(
-            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/
+            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\/\d.+?\.js)"/
         )?.[1];
     }
     const suffixJs = await fetch(suffixUrl);
