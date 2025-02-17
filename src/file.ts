@@ -7,21 +7,35 @@ import { auths } from "./file-magics";
 
 export type FileType = "img" | "mp3" | "midi";
 
-const getSuffix = async (scoreUrl: string): Promise<string> => {
-    let suffixUrl;
+const getSuffix = async (scoreUrl: string): Promise<string | null> => {
+    let suffixUrls: string[] = [];
     if (scoreUrl !== "") {
-        suffixUrl = (await (await fetch(scoreUrl)).text()).match(
-            'link href="(https://musescore.com/static/public/build/musescore.*?(?:_es6)?/20.+?/\\d.+?.js)"'
-        )?.[1]!;
+        const response = await fetch(scoreUrl);
+        const text = await response.text();
+        suffixUrls = [
+            ...text.matchAll(
+                /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/g
+            ),
+        ].map((match) => match[1]);
     } else {
-        suffixUrl = document.head.innerHTML.match(
-            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\/\d.+?\.js)"/
-        )?.[1];
+        suffixUrls = [
+            ...document.head.innerHTML.matchAll(
+            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/g
+            ),
+        ].map((match) => match[1]);
     }
-    const suffixJs = await fetch(suffixUrl);
-    return (await suffixJs.text()).match(
-        '(?:.*)"(.+)"\\)\\.substr\\(0,4\\)'
-    )?.[1]!;
+    
+    for (const url of suffixUrls) {
+        const response = await fetch(url);
+        const text = await response.text();
+
+        const match = text.match(/"([^"]+)"\)\.substr\(0,4\)/);
+        if (match) {
+            return match[1];
+        }
+    }
+
+    return null;
 };
 
 const getApiUrl = (id: number, type: FileType, index: number): string => {
