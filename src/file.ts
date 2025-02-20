@@ -14,13 +14,13 @@ const getSuffix = async (scoreUrl: string): Promise<string | null> => {
         const text = await response.text();
         suffixUrls = [
             ...text.matchAll(
-                /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/g
+                /link.+?href=["'](https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)["']/g
             ),
         ].map((match) => match[1]);
     } else {
         suffixUrls = [
             ...document.head.innerHTML.matchAll(
-            /link href="(https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)"/g
+                /link.+?href=["'](https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)["']/g
             ),
         ].map((match) => match[1]);
     }
