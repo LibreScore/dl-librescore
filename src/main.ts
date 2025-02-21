@@ -57,7 +57,6 @@ const main = (): void => {
     let isPDFOnly = false;
     if (isOfficial) {
         isPDFOnly = !document.querySelector("#playerControls");
-        }
     }
     new Promise(() => {
         let noSub = isMobile
