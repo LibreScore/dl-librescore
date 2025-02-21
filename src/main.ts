@@ -40,16 +40,23 @@ if (isGmAvailable("registerMenuCommand")) {
 const { saveAs } = FileSaver;
 
 const main = (): void => {
+    let isOfficial = !!(
+        document.querySelector(
+            "meta[property='musescore:author'][content='Official Scores']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='Official Author']"
+        )
+    );
     let isMobile = !document.querySelector('button[title="Toggle Fullscreen"]');
     if (isMobile) {
-        const parentDiv = document.querySelector("#jmuse-layout");
-        const divs = parentDiv!.querySelectorAll("div");
-        const validDiv = [...divs].find(
-            (div) => div.querySelectorAll("button").length === 3
-        );
-
-        if (validDiv) {
-            isMobile = false;
+        isMobile = !Array.from([
+            ...document.querySelector("#jmuse-layout")!.querySelectorAll("div"),
+        ]).some((div) => div.querySelectorAll("button").length === 3);
+    }
+    let isPDFOnly = false;
+    if (isOfficial) {
+        isPDFOnly = !document.querySelector("#playerControls");
         }
     }
     new Promise(() => {
@@ -69,15 +76,7 @@ const main = (): void => {
             return indvPartBtn?.click();
         };
 
-        if (
-            noSub &&
-            (document.querySelector(
-                "meta[property='musescore:author'][content='Official Scores']"
-            ) ||
-                document.querySelector(
-                    "meta[property='musescore:author'][content='Official Author']"
-                ))
-        ) {
+        if (noSub && isOfficial) {
             btnList.add({
                 name:
                     i18next.t("download", { fileType: "PDF" }) +
@@ -108,6 +107,7 @@ const main = (): void => {
             });
         }
 
+        if (!isPDFOnly) {
         btnList.add({
             name: i18next.t("download", { fileType: "MIDI" }),
             action: BtnAction.download(
@@ -127,6 +127,7 @@ const main = (): void => {
                 30 * 1000 /* 30s */
             ),
         });
+        }
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         btnList.commit(BtnListMode.InPage);
     });
