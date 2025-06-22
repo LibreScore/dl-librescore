@@ -1,7 +1,7 @@
 {
-    "processing": "",
-    "download": "",
-    "official_button": "",
+    "processing": "Processando…",
+    "download": "Baixar {{fileType}}",
+    "official_button": "Assinatura necessária",
     "official_tooltip": "",
     "download_audio": "",
     "full_score": "",
