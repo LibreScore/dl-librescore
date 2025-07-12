@@ -68,3 +68,6 @@ typings/
 dist/
 
 .vscode/
+.vscode/**
+
+bun.lock

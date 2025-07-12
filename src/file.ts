@@ -83,9 +83,10 @@ const getApiAuthNetwork = async (
                                 );
 
                                 if (audioSources !== null) {
-                                    audioSources.querySelector(
-                                        "option[value='0']"
-                                    )?.selected = true;
+                                    const option = audioSources.querySelector("option[value='0']");
+                                    if (option) {
+                                        (option as HTMLOptionElement).selected = true;
+                                    }
 
                                     audioSources.dispatchEvent(
                                         new Event("change")
@@ -96,18 +97,18 @@ const getApiAuthNetwork = async (
                                         "article[role='dialog'] header > button"
                                     )
                                     ?.click();
-                    }
+                            }
                         });
                         observer.observe(document.body, {
                             childList: true,
                             subtree: true,
                         });
                     } else {
-                    const el =
-                        fsBtn.parentElement?.parentElement?.querySelector(
-                            "button"
-                        ) as HTMLButtonElement;
-                    el.click();
+                        const el =
+                            fsBtn.parentElement?.parentElement?.querySelector(
+                                "button"
+                            ) as HTMLButtonElement;
+                        el.click();
                     }
                     break;
                 }
@@ -119,7 +120,7 @@ const getApiAuthNetwork = async (
                         // mobile device
                         document.querySelector("#scorePlayButton")?.click();
                     } else {
-                    el.click();
+                        el.click();
                     }
                     break;
                 }
@@ -133,7 +134,7 @@ const getApiAuthNetwork = async (
                         numPages = parentDiv.children.length - 3;
                         let i = 0;
 
-                        function scrollToNextChild() {
+                        function scrollToNextChild () {
                             let childDiv = parentDiv.children[i];
                             if (childDiv) {
                                 childDiv.scrollIntoView();
