@@ -73,12 +73,16 @@ export const generatePDF = async (
             imgBlobs.map((b) => readData(b, "dataUrl"))
         );
 
-        imgDataUrlList.forEach((data) => {
-            pdf.addPage();
-            pdf.image(data, {
-                width,
-                height,
-            });
+        imgDataUrlList.forEach((data, idx) => {
+            try {
+                pdf.addPage();
+                pdf.image(data, {
+                    width,
+                    height,
+                });
+            } except (err) {
+                console.warn(`Skipping image #${idx} due to error: ${err.message}`);
+            }
         });
     } else {
         // imgType == "svg"
