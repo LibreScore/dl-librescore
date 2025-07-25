@@ -21,5 +21,6 @@
 // @connect      self
 // @connect      musescore.com
 // @connect      ultimate-guitar.com
+// @connect      wasabisys.com
 // @run-at       document-start
 // ==/UserScript==
