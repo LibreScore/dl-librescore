@@ -597,55 +597,59 @@ void (async () => {
 
         await Promise.all(
             types.map(async (type) => {
-                // download/generate file data
-                let fileExt: String;
-                let fileData: Buffer;
-                switch (type) {
-                    case "midi": {
-                        fileExt = "mid";
-                        const fileUrl = await getFileUrl(
-                            scoreinfo.id,
-                            "midi",
-                            argv.input
-                        );
-                        fileData = await fetchBuffer(fileUrl);
-                        break;
-                    }
-                    case "mp3": {
-                        fileExt = "mp3";
-                        const fileUrl = await getFileUrl(
-                            scoreinfo.id,
-                            "mp3",
-                            argv.input
-                        );
-                        fileData = await fetchBuffer(fileUrl);
-                        break;
-                    }
-                    case "pdf": {
-                        fileExt = "pdf";
-                        fileData = Buffer.from(
-                            await exportPDF(
-                                scoreinfo,
-                                scoreinfo.sheet,
+                try {
+                    // download/generate file data
+                    let fileExt: String;
+                    let fileData: Buffer;
+                    switch (type) {
+                        case "midi": {
+                            fileExt = "mid";
+                            const fileUrl = await getFileUrl(
+                                scoreinfo.id,
+                                "midi",
                                 argv.input
-                            )
-                        );
-                        break;
+                            );
+                            fileData = await fetchBuffer(fileUrl);
+                            break;
+                        }
+                        case "mp3": {
+                            fileExt = "mp3";
+                            const fileUrl = await getFileUrl(
+                                scoreinfo.id,
+                                "mp3",
+                                argv.input
+                            );
+                            fileData = await fetchBuffer(fileUrl);
+                            break;
+                        }
+                        case "pdf": {
+                            fileExt = "pdf";
+                            fileData = Buffer.from(
+                                await exportPDF(
+                                    scoreinfo,
+                                    scoreinfo.sheet,
+                                    argv.input
+                                )
+                            );
+                            break;
+                        }
                     }
-                }
 
-                // save to filesystem
-                const f = path.join(
-                    argv.output,
-                    `${scoreinfo.fileName}.${fileExt}`
-                );
-                await fs.promises.writeFile(f, fileData);
-                if (argv.verbose) {
-                    spinner.info(
-                        i18next.t("cli_saved_message", {
-                            file: chalk.underline(f),
-                        })
+                    // save to filesystem
+                    const f = path.join(
+                        argv.output,
+                        `${scoreinfo.fileName}.${fileExt}`
                     );
+                    await fs.promises.writeFile(f, fileData);
+                    if (argv.verbose) {
+                        spinner.info(
+                            i18next.t("cli_saved_message", {
+                                file: chalk.underline(f),
+                            })
+                        );
+                    }
+                } catch (e) {
+                    spinner.fail(`Failed to download ${type}: ${e.message}`);
                 }
             })
         );

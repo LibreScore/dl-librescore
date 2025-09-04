@@ -1,6 +1,7 @@
 /* eslint-disable no-extend-native */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 
+import isNode from "detect-node";
 import md5 from "md5";
 import { getFetch } from "./utils";
 import { auths } from "./file-magics";
@@ -18,6 +19,10 @@ const getSuffix = async (scoreUrl: string): Promise<string | null> => {
             ),
         ].map((match) => match[1]);
     } else {
+        if (isNode) {
+            // Cannot get suffix in node without a scoreUrl
+            return null;
+        }
         suffixUrls = [
             ...document.head.innerHTML.matchAll(
                 /link.+?href=["'](https:\/\/musescore\.com\/static\/public\/build\/musescore.*?(?:_es6)?\/20.+?\.js)["']/g
@@ -58,6 +63,9 @@ const getApiAuthNetwork = async (
     type: FileType,
     index: number
 ): Promise<string> => {
+    if (isNode) {
+        throw new Error("getApiAuthNetwork is not supported in Node.js");
+    }
     let numPages = 0;
     let pageCooldown = 25;
     if (!auths[type + index]) {
