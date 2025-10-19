@@ -54,7 +54,7 @@
     "@types/md5": "^2.3.5",
     "@types/pdfkit": "^0.13.8",
     "@types/yargs": "^17.0.33",
-    "pdfkit": "git+https://github.com/LibreScore/pdfkit.git",
+    "pdfkit": "git+https://github.com/LibreScore/pdfkit.git#b4cb32eb1734a2f73ba2d92743647b1a91c0e2a8",
     "rollup": "^4.29.1",
     "@rollup/plugin-commonjs": "^28.0.2",
     "rollup-plugin-node-globals": "^1.4.0",
