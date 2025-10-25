@@ -27,9 +27,9 @@ const getSuffix = async (
             ),
         ].map((match) => match[1]);
     }
-    
+
     for (const url of suffixUrls) {
-        const response = await fetch(url);
+        const response = await _fetch(url);
         const text = await response.text();
 
         const match = text.match(/"([^"]+)"\)\.substr\(0,4\)/);
@@ -99,18 +99,18 @@ const getApiAuthNetwork = async (
                                         "article[role='dialog'] header > button"
                                     )
                                     ?.click();
-                    }
+                            }
                         });
                         observer.observe(document.body, {
                             childList: true,
                             subtree: true,
                         });
                     } else {
-                    const el =
-                        fsBtn.parentElement?.parentElement?.querySelector(
-                            "button"
-                        ) as HTMLButtonElement;
-                    el.click();
+                        const el =
+                            fsBtn.parentElement?.parentElement?.querySelector(
+                                "button"
+                            ) as HTMLButtonElement;
+                        el.click();
                     }
                     break;
                 }
@@ -122,7 +122,7 @@ const getApiAuthNetwork = async (
                         // mobile device
                         document.querySelector("#scorePlayButton")?.click();
                     } else {
-                    el.click();
+                        el.click();
                     }
                     break;
                 }

@@ -44,8 +44,6 @@ export const getFetch = (): typeof fetch => {
                 init?.headers || {}
             );
 
-            console.log("Fetching:", url);
-
             const axiosConfig: any = {
                 url,
                 method: (init?.method as string) || "GET",

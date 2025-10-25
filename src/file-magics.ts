@@ -37,7 +37,6 @@ export const auths = {};
                                 let m = url.match(TYPE_REG);
                                 let i = url.match(INDEX_REG);
                                 if (m && i) {
-                                    // console.log(url, token, m[1], i[1]);
                                     const type = m[1];
                                     const index = i[1];
                                     auths[type + index] = token;
