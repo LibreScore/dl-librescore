@@ -26,26 +26,82 @@ export const getFetch = (): typeof fetch => {
         return fetch;
     } else {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const nodeFetch = require("node-fetch");
+        const axios = require("axios");
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        // Use proxy based on standard proxy environment variables
         const ProxyAgent = require("proxy-agent");
+
         return (input: RequestInfo, init?: RequestInit) => {
-            if (typeof input === "string" && !input.startsWith("http")) {
+            let url =
+                typeof input === "string" ? input : (input as any)?.url ?? "";
+            if (typeof url === "string" && !url.startsWith("http")) {
                 // fix: Only absolute URLs are supported
-                input = "https://musescore.com" + input;
+                url = "https://musescore.com" + url;
             }
-            init = Object.assign(
-                {
-                headers: NODE_FETCH_HEADERS,
-                // Use the `HTTPS_PROXY` environment variable for no URL given
-                // see: https://github.com/TooTallNate/node-proxy-agent#proxy-agent
-                agent: new ProxyAgent(),
-                },
-                init
+
+            const headers = Object.assign(
+                {},
+                NODE_FETCH_HEADERS,
+                init?.headers || {}
             );
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return nodeFetch(input, init);
+
+            console.log("Fetching:", url);
+
+            const axiosConfig: any = {
+                url,
+                method: (init?.method as string) || "GET",
+                headers,
+                responseType: "arraybuffer",
+                signal: (init as any)?.signal,
+                httpAgent: new ProxyAgent(),
+                httpsAgent: new ProxyAgent(),
+                maxRedirects: 10,
+            };
+
+            if (init?.body !== undefined) {
+                axiosConfig.data = init.body;
+            }
+
+            return axios
+                .request(axiosConfig)
+                .then((res: any) => {
+                    const arrayBuffer = res.data as ArrayBuffer;
+                    const buf = Buffer.from(arrayBuffer);
+                    const nodeRes: any = {
+                        ok: res.status >= 200 && res.status < 300,
+                        status: res.status,
+                        statusText: res.statusText,
+                        url: res.config?.url || url,
+                        headers: res.headers,
+                        json: async () => {
+                            const txt = buf.toString("utf8");
+                            return JSON.parse(txt);
+                        },
+                        text: async () => buf.toString("utf8"),
+                        arrayBuffer: async () => arrayBuffer,
+                    };
+                    return nodeRes;
+                })
+                .catch((err: any) => {
+                    if (err.response) {
+                        const res = err.response;
+                        const arrayBuffer = res.data as ArrayBuffer;
+                        const buf = Buffer.from(
+                            arrayBuffer || new ArrayBuffer(0)
+                        );
+                        const nodeRes: any = {
+                            ok: res.status >= 200 && res.status < 300,
+                            status: res.status,
+                            statusText: res.statusText,
+                            url: res.config?.url || url,
+                            headers: res.headers,
+                            json: async () => JSON.parse(buf.toString("utf8")),
+                            text: async () => buf.toString("utf8"),
+                            arrayBuffer: async () => arrayBuffer,
+                        };
+                        return nodeRes;
+                    }
+                    throw err;
+                });
         };
     }
 };

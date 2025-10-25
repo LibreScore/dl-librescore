@@ -7,10 +7,13 @@ import { auths } from "./file-magics";
 
 export type FileType = "img" | "mp3" | "midi";
 
-const getSuffix = async (scoreUrl: string): Promise<string | null> => {
+const getSuffix = async (
+    scoreUrl: string,
+    _fetch = getFetch()
+): Promise<string | null> => {
     let suffixUrls: string[] = [];
     if (scoreUrl !== "") {
-        const response = await fetch(scoreUrl);
+        const response = await _fetch(scoreUrl);
         const text = await response.text();
         suffixUrls = [
             ...text.matchAll(

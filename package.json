@@ -35,6 +35,7 @@
   "dependencies": {
     "@librescore/fonts": "^0.4.1",
     "@librescore/sf3": "^0.8.0",
+    "axios": "^1.12.2",
     "detect-node": "^2.1.0",
     "i18next": "^23.16.8",
     "inquirer": "^8.2.6",
