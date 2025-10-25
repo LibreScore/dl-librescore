@@ -80,8 +80,9 @@ export const generatePDF = async (
                     width,
                     height,
                 });
-            } except (err) {
-                console.warn(`Skipping image #${idx} due to error: ${err.message}`);
+            } catch (err) {
+                const msg = err instanceof Error ? err.message : String(err);
+                console.warn(`Skipping image #${idx} due to error: ${msg}`);
             }
         });
     } else {
