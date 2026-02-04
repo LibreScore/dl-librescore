@@ -9,6 +9,9 @@ on:
                 description: "The version number. default: the version number in package.json"
                 required: false
 
+permissions:
+    id-token: write
+
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
     cancel-in-progress: true
@@ -32,25 +35,23 @@ jobs:
                   if [[ "$(npm show dl-librescore version)" != "$(node -p "require('./package.json').version")" ]]; then
                       echo "updated=true" >> $GITHUB_ENV
                   fi
-            - uses: actions/setup-node@v2.4.1
+            - uses: actions/setup-node@v6
               if: env.updated == 'true'
               with:
-                  node-version: 16
-                  registry-url: https://registry.npmjs.org/
+                  node-version: 24
+                  registry-url: https://registry.npmjs.org
             - name: Build userscript and command-line tool
               if: env.updated == 'true'
               run: |
                   VER=$(node -p "require('./package.json').version")
                   echo "VERSION=$VER" >> $GITHUB_ENV
-                  npm install
+                  npm ci
                   npm version --allow-same-version --no-git-tag $VERSION
                   npm run build
                   npm run pack:ext
             - name: Publish command-line tool to NPM
               if: env.updated == 'true'
               run: npm publish --tag $NPM_TAG
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
             - name: Publish GitHub Release
               if: env.updated == 'true'
               env:
@@ -70,3 +71,4 @@ jobs:
               if: env.updated == 'false'
               run: |
                   curl -s -i -u ${{ secrets.LIBRESCORE_USERNAME }}:${{ secrets.LIBRESCORE_TOKEN }} -d '{"event_type":"delete_action","client_payload":{"run_id":"'"${{ github.run_id }}"'","repo":"LibreScore/dl-librescore"}}' -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/LibreScore/actions/dispatches
+
