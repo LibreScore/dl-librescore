@@ -150,153 +150,92 @@ export namespace BtnAction {
         else return url;
     };
 
-    export const download = (
-        url: UrlInput,
-        fileName: string,
-        fallback?: () => Promisable<void>,
-        timeout?: number,
-        target?: "_blank"
-    ): BtnAction =>
-        process(
-            async (name, setText): Promise<void> => {
-                const _url = await normalizeUrlInput(url);
+const __downloadBlobCache = new Map<string, Blob>();
 
-                if (isGmAvailable("xmlHttpRequest")) {
-                    _GM.xmlHttpRequest({
-                        method: "GET",
-                        url: _url,
-                        headers: { Range: "bytes=0-0" },
-                        onload: function (response) {
-                            const headers = response.responseHeaders;
-                            const contentDisposition = headers
-                                .split("\n")
-                                .find((header) =>
-                                    header
-                                        .toLowerCase()
-                                        .startsWith("content-disposition")
-                                );
+export const download = (
+    url: UrlInput,
+    fileName: string,
+    fallback?: () => Promisable<void>,
+    timeout?: number,
+    target?: "_blank"
+): BtnAction =>
+    process(
+        async (name, setText): Promise<void> => {
+            const _url = await normalizeUrlInput(url);
 
-                            if (contentDisposition) {
-                                const a = document.createElement("a");
-                                a.href = _url;
-                                a.download = fileName;
-                                if (target) a.target = target;
-                                a.dispatchEvent(new MouseEvent("click"));
-                            } else {
-                                fetch(_url)
-                                    .then((response) => {
-                                        if (!response.ok) {
-                                            throw new Error(
-                                                "Failed to fetch the file"
-                                            );
-                                        }
-                                        const contentLength =
-                                            response.headers.get(
-                                                "Content-Length"
-                                            );
+            const u = new window.URL(_url, window.location.href);
+            const cacheKey = `${u.origin}${u.pathname}::${fileName}`;
 
-                                        if (!contentLength) {
-                                            return response.blob();
-                                        }
+            let blob = __downloadBlobCache.get(cacheKey);
 
-                                        const contentType =
-                                            response.headers.get(
-                                                "Content-Type"
-                                            ) || "application/octet-stream";
-                                        const total = parseInt(
-                                            contentLength,
-                                            10
-                                        );
-                                        let loaded = 0;
+            if (!blob) {
+                const response = await fetch(_url);
 
-                                        const reader =
-                                            response.body!.getReader();
+                if (!response.ok) {
+                    throw new Error("Failed to fetch the file");
+                }
 
-                                        const stream = new ReadableStream({
-                                            start(controller) {
-                                                const percent = Math.round(
-                                                    (loaded / total) * 100
-                                                );
-                                                setText(`${percent}%`);
+                const contentLength =
+                    response.headers.get("Content-Length");
 
-                                                function push() {
-                                                    reader
-                                                        .read()
-                                                        .then(
-                                                            ({
-                                                                done,
-                                                                value,
-                                                            }) => {
-                                                                if (done) {
-                                                                    controller.close();
-                                                                    setText(
-                                                                        name
-                                                                    );
-                                                                    return;
-                                                                }
+                if (!contentLength) {
+                    blob = await response.blob();
+                } else {
+                    const contentType =
+                        response.headers.get("Content-Type") ||
+                        "application/octet-stream";
 
-                                                                loaded +=
-                                                                    value.byteLength;
+                    const total = parseInt(contentLength, 10);
+                    let loaded = 0;
 
-                                                                // Update progress
-                                                                const percent =
-                                                                    Math.round(
-                                                                        (loaded /
-                                                                            total) *
-                                                                            100
-                                                                    );
-                                                                setText(
-                                                                    `${percent}%`
-                                                                );
+                    const reader = response.body!.getReader();
 
-                                                                controller.enqueue(
-                                                                    value
-                                                                );
-                                                                push();
-                                                            }
-                                                        );
-                                                }
-                                                push();
-                                            },
-                                        });
-                                        return new Response(stream)
-                                            .blob()
-                                            .then((blob) => {
-                                                return new Blob([blob], {
-                                                    type: contentType,
-                                                });
-                                            });
-                                    })
-                                    .then((blob) => {
-                                        // Create a blob URL
-                                        const blobUrl =
-                                            window.URL.createObjectURL(blob);
+                    const stream = new ReadableStream({
+                        start(controller) {
+                            function push() {
+                                reader.read().then(({ done, value }) => {
+                                    if (done) {
+                                        controller.close();
+                                        setText(name);
+                                        return;
+                                    }
 
-                                        // Create a temporary <a> element
-                                        const a = document.createElement("a");
-                                        a.href = blobUrl;
-                                        a.download = fileName; // Set the desired filename
-                                        if (target) a.target = target;
-                                        a.dispatchEvent(
-                                            new MouseEvent("click")
-                                        );
+                                    loaded += value.byteLength;
+                                    const percent = Math.round(
+                                        (loaded / total) * 100
+                                    );
+                                    setText(`${percent}%`);
 
-                                        window.URL.revokeObjectURL(blobUrl);
-                                    })
-                                    .catch((error) => {
-                                        console.error(
-                                            "Error downloading the file:",
-                                            error
-                                        );
-                                    });
+                                    controller.enqueue(value);
+                                    push();
+                                });
                             }
+                            push();
                         },
                     });
+
+                    const rawBlob = await new Response(stream).blob();
+                    blob = new Blob([rawBlob], { type: contentType });
                 }
-            },
-            fallback,
-            timeout
-        );
+
+                __downloadBlobCache.set(cacheKey, blob);
+            }
+
+            const blobUrl = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = blobUrl;
+            a.download = fileName;
+            if (target) a.target = target;
+            a.dispatchEvent(new MouseEvent("click"));
+
+            setTimeout(() => {
+                window.URL.revokeObjectURL(blobUrl);
+            }, 0);
+        },
+        fallback,
+        timeout
+    );
 
     export const openUrl = (
         url: UrlInput,

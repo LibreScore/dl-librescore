@@ -86,24 +86,26 @@ const main = (): void => {
                 tooltip: i18next.t("official_tooltip"),
             });
         } else {
-            btnList.add({
-                name: i18next.t("download", {
-                    fileType: "PDF",
-                }),
-                action: BtnAction.process(
-                    async (_, setText): Promise<void> => {
-                        return downloadPDF(
-                            scoreinfo,
-                            new SheetInfoInPage(document),
-                            saveAs,
-                            setText
-                        );
-                    },
+            if (document.querySelector("#jmuse-scroller-component div")) {
+                btnList.add({
+                    name: i18next.t("download", {
+                        fileType: "PDF",
+                    }),
+                    action: BtnAction.process(
+                        async (_, setText): Promise<void> => {
+                            return downloadPDF(
+                                scoreinfo,
+                                new SheetInfoInPage(document),
+                                saveAs,
+                                setText
+                            );
+                        },
 
-                    fallback,
-                    3 * 60 * 1000 /* 3min */
-                ),
-            });
+                        fallback,
+                        3 * 60 * 1000 /* 3min */
+                    ),
+                });
+            }
         }
 
         if (!isPDFOnly) {

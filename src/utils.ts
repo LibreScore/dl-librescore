@@ -239,15 +239,47 @@ export const waitForDocumentLoaded = (): Promise<void> => {
 export const waitForSheetLoaded = (): Promise<void> => {
     return new Promise((resolve) => {
         const observer = new MutationObserver(() => {
+            try {
+                window.UGAPP.store.score.xtz.is_allowed = false
+            } catch {
+            }
+            try {
+                (() => {
+                    const originalAddEventListener = window.addEventListener;
+                    window.addEventListener = function(type, _listener, _options) {
+                        if (type === 'devtoolschange') {
+                            return;
+                        }
+                        return originalAddEventListener.apply(this, arguments);
+                    };
+                })();
+            } catch {
+            }
             const meta =
                 document.querySelector(
                     "#ELEMENT_ID_SCORE_DOWNLOAD_SECTION > section > button"
-                ) && document.querySelector("#jmuse-scroller-component div");
+                ) && (document.querySelector("#jmuse-scroller-component div") || document.querySelector("#xtz_canvas"));
             if (meta) {
                 resolve();
                 observer.disconnect();
             }
         });
+        try {
+            window.UGAPP.store.score.xtz.is_allowed = false
+        } catch {
+        }
+        try {
+            (() => {
+                const originalAddEventListener = window.addEventListener;
+                window.addEventListener = function(type, _listener, _options) {
+                    if (type === 'devtoolschange') {
+                        return;
+                    }
+                    return originalAddEventListener.apply(this, arguments);
+                };
+            })();
+        } catch {
+        }
         observer.observe(document, { childList: true, subtree: true });
     });
 };

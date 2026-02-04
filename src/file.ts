@@ -216,7 +216,7 @@ export const getFileUrl = async (
     });
 
     if (!r.ok) {
-        auth = md5(`${id}${type}${index}%3(3`).slice(0, 4);
+        auth = md5(`${id}${type}${index}9654,4e`).slice(0, 4);
         r = await _fetch(url, {
             headers: {
                 Authorization: auth,
