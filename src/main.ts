@@ -17,8 +17,8 @@ if (isGmAvailable("registerMenuCommand")) {
     // add buttons to the userscript manager menu
     _GM.registerMenuCommand(
         "** " +
-            i18next.t("version", { version: _GM.info.script.version }) +
-            " **",
+        i18next.t("version", { version: _GM.info.script.version }) +
+        " **",
         () =>
             _GM.openInTab(
                 "https://github.com/LibreScore/dl-librescore/releases",
@@ -40,33 +40,41 @@ if (isGmAvailable("registerMenuCommand")) {
 const { saveAs } = FileSaver;
 
 const main = (): void => {
-    let isOfficial = !!(
+    let isOfficial = window.UGAPP.store.page.data.score.is_official ?? !!(
         document.querySelector(
             "meta[property='musescore:author'][content='Official Scores']"
         ) ||
         document.querySelector(
             "meta[property='musescore:author'][content='Official Author']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='Hal Leonard']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='Faber']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='Made By Muse']"
+        ) ||
+        document.querySelector(
+            "meta[property='musescore:author'][content='ArrangeMe']"
         )
     );
-    let isMobile = !document.querySelector('button[title="Toggle Fullscreen"]');
-    if (isMobile) {
-        isMobile = !Array.from([
+    let isMobile = (window.UGAPP.config.is_mobile || window.UGAPP.config.is_tablet) ?? (!document.querySelector('button[title="Toggle Fullscreen"]') ?
+        !Array.from([
             ...document.querySelector("#jmuse-layout")!.querySelectorAll("div"),
-        ]).some((div) => div.querySelectorAll("button").length === 3);
-    }
+        ]).some((div) => div.querySelectorAll("button").length === 3)
+        : false);
     let isPDFOnly = false;
     if (isOfficial) {
-        isPDFOnly = !document.querySelector("#playerControls");
+        isPDFOnly = window.UGAPP.store.page.data.score.is_pdf ?? !document.querySelector("#playerControls");
     }
     new Promise(() => {
-        let noSub = isMobile
-            ? document.querySelector("#jmuse-scroller-component")!
-                  .childElementCount <= 1
-            : Array.from([
-                  ...document.querySelectorAll("#jmuse-scroller-component div"),
-              ]).some((el: HTMLDivElement) =>
-                  el.innerText.startsWith("End of preview")
-              );
+        let noSub = (!window.UGAPP.store.user.isPro || !window.UGAPP.store.user.isProPlus) ?? Array.from([
+            ...document.querySelectorAll(isMobile ? "#official-score-banner" : "#jmuse-scroller-component" + " div"),
+        ]).some((el: HTMLDivElement) =>
+            el.innerText.startsWith("End of preview")
+        );
         const scoreinfo = new ScoreInfoInPage(document);
         const btnList = new BtnList();
         let indvPartBtn: HTMLButtonElement | null = null;
@@ -107,25 +115,25 @@ const main = (): void => {
         }
 
         if (!isPDFOnly) {
-        btnList.add({
-            name: i18next.t("download", { fileType: "MIDI" }),
-            action: BtnAction.download(
-                () => getFileUrl(scoreinfo.id, "midi"),
-                scoreinfo.fileName,
-                fallback,
-                30 * 1000 /* 30s */
-            ),
-        });
+            btnList.add({
+                name: i18next.t("download", { fileType: "MIDI" }),
+                action: BtnAction.download(
+                    () => getFileUrl(scoreinfo.id, "midi"),
+                    scoreinfo.fileName,
+                    fallback,
+                    30 * 1000 /* 30s */
+                ),
+            });
 
-        btnList.add({
-            name: i18next.t("download", { fileType: "MP3" }),
-            action: BtnAction.download(
-                () => getFileUrl(scoreinfo.id, "mp3"),
-                scoreinfo.fileName,
-                fallback,
-                30 * 1000 /* 30s */
-            ),
-        });
+            btnList.add({
+                name: i18next.t("download", { fileType: "MP3" }),
+                action: BtnAction.download(
+                    () => getFileUrl(scoreinfo.id, "mp3"),
+                    scoreinfo.fileName,
+                    fallback,
+                    30 * 1000 /* 30s */
+                ),
+            });
         }
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         btnList.commit(BtnListMode.InPage);
