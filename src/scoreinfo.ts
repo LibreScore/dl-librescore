@@ -123,11 +123,15 @@ export class SheetInfoInPage extends SheetInfo {
     }
 
     get pageCount(): number {
-        const sheet0Div = this.sheet0Img?.parentElement;
-        if (!sheet0Div) {
-            throw new Error(i18next.t("no_sheet_images_error"));
+        if (document.querySelector("#jmuse-scroller-component div")) {
+            const sheet0Div = this.sheet0Img?.parentElement;
+            if (!sheet0Div) {
+                throw new Error(i18next.t("no_sheet_images_error"));
+            }
+            return this.document.getElementsByClassName(sheet0Div.className).length;
+        } else {
+            return window.UGAPP.store.page.data.score.pages_count;
         }
-        return this.document.getElementsByClassName(sheet0Div.className).length;
     }
 
     get thumbnailUrl(): string {
