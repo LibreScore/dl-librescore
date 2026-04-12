@@ -108,8 +108,9 @@ export abstract class SheetInfo {
 
     get imgType(): "svg" | "png" {
         const thumbnail = this.thumbnailUrl;
-        const imgtype = thumbnail.match(/score_0\.(\w+)/)![1];
-        return imgtype as "svg" | "png";
+        console.log("THUMBNAIL: " + thumbnail)
+        const imgtype = thumbnail.substring(thumbnail.lastIndexOf("."), thumbnail.length);
+        return imgtype;
     }
 }
 
