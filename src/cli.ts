@@ -13,12 +13,10 @@ import { getFileUrl } from "./file";
 import { exportPDF } from "./pdf";
 import i18nextInit, { i18next } from "./i18n/index";
 import { InputFileFormat } from "webmscore/schemas";
+import { input, checkbox, confirm } from '@inquirer/prompts';
 
-(async () => {
-    await i18nextInit;
-})();
+await i18nextInit;
 
-const inquirer: typeof import("inquirer") = require("inquirer");
 const ora: typeof import("ora") = require("ora");
 const chalk: typeof import("chalk") = require("chalk");
 const yargs = require("yargs");
@@ -27,7 +25,7 @@ const argv: any = yargs(hideBin(process.argv))
     .usage(i18next.t("cli_usage_hint", { bin: "$0" }))
     .example(
         "$0 -i https://musescore.com/user/123/scores/456 -t mp3 -o " +
-            process.cwd(),
+        process.cwd(),
         i18next.t("cli_example_url")
     )
     .example(
@@ -98,7 +96,7 @@ const createSpinner = () => {
     }).start();
 };
 
-const checkboxValidate = (input: number[]) => {
+const checkboxValidate = (input) => {
     return input.length >= 1;
 };
 
@@ -114,11 +112,10 @@ const getOutputDir = async (defaultOutput: string) => {
     let dirNotExistsTries = 0;
     let lastTryDir: string | null = null;
 
-    const { output } = await inquirer.prompt<Params>({
-        type: "input",
-        name: "output",
+    const output = await input({
         message: i18next.t("cli_output_message"),
-        async validate(input: string) {
+        default: defaultOutput,
+        validate: async (input: string) => {
             if (!input) return false;
 
             const dirExists = fs.existsSync(input);
@@ -156,117 +153,263 @@ const getOutputDir = async (defaultOutput: string) => {
             }
 
             return true;
-        },
-        default: defaultOutput,
+        }
     });
 
     return output;
 };
 
-void (async () => {
-    if (!isNpx()) {
-        const { installed, latest, isLatest } = await getVerInfo();
-        if (!isLatest) {
-            console.log(
-                chalk.yellowBright(
-                    i18next.t("cli_outdated_version_message", {
-                        installed: installed,
-                        latest: latest,
-                    })
-                )
+if (!isNpx()) {
+    const { installed, latest, isLatest } = await getVerInfo();
+    if (!isLatest) {
+        console.log(
+            chalk.yellowBright(
+                i18next.t("cli_outdated_version_message", {
+                    installed: installed,
+                    latest: latest,
+                })
+            )
+        );
+    }
+}
+
+let isInteractive = true;
+let types;
+let filetypes;
+
+// Check if both input and type arguments are used
+if (argv.input && argv.type) {
+    isInteractive = false;
+}
+
+if (isInteractive) {
+    argv.verbose = true;
+    // Determine platform and paste message
+    const platform = os.platform();
+    let pasteMessage = "";
+    if (platform === "win32") {
+        pasteMessage = i18next.t("cli_windows_paste_hint");
+    } else if (platform === "linux") {
+        pasteMessage = i18next.t("cli_linux_paste_hint");
+    } // For MacOS, no hint is needed because the paste shortcut is universal.
+
+    const fileInit = await input({
+        message: `${i18next.t("cli_input_message")}
+  (${i18next.t("cli_input_suffix")}) ${chalk.bgGray(pasteMessage)}
+`,
+        default: argv.input,
+        validate: (input: string) => {
+            if (!input) return false;
+            return (
+                !!input.match(SCORE_URL_REG) ||
+                (fs.existsSync(input) && fs.statSync(input).isFile()) ||
+                (fs.existsSync(input) && fs.statSync(input).isDirectory())
             );
+        },
+    });
+
+    argv.input = fileInit;
+}
+
+const spinner = createSpinner();
+
+// Check if input is a file or directory
+let isFile: boolean;
+let isDir: boolean;
+try {
+    isFile = fs.lstatSync(argv.input).isFile();
+    isDir = fs.lstatSync(argv.input).isDirectory();
+} catch (_) {
+    isFile = false;
+    isDir = false;
+}
+
+// Check if local file or directory
+if (isFile || isDir) {
+    let filePaths: string[] = [];
+
+    if (isDir) {
+        if (!(argv.input.endsWith("/") || argv.input.endsWith("\\"))) {
+            argv.input += "/";
         }
-    }
-
-    let isInteractive = true;
-    let types;
-    let filetypes;
-
-    // Check if both input and type arguments are used
-    if (argv.input && argv.type) {
-        isInteractive = false;
-    }
-
-    if (isInteractive) {
-        argv.verbose = true;
-        // Determine platform and paste message
-        const platform = os.platform();
-        let pasteMessage = "";
-        if (platform === "win32") {
-            pasteMessage = i18next.t("cli_windows_paste_hint");
-        } else if (platform === "linux") {
-            pasteMessage = i18next.t("cli_linux_paste_hint");
-        } // For MacOS, no hint is needed because the paste shortcut is universal.
-
-        // ask for the page url or path to local file
-        const { fileInit } = await inquirer.prompt<Params>({
-            type: "input",
-            name: "fileInit",
-            message: i18next.t("cli_input_message"),
-            suffix:
-                "\n  (" +
-                i18next.t("cli_input_suffix") +
-                `) ${chalk.bgGray(pasteMessage)}\n `,
-            validate(input: string) {
-                return (
-                    input &&
-                    (!!input.match(SCORE_URL_REG) ||
-                        fs.statSync(input).isFile() ||
-                        fs.statSync(input).isDirectory())
-                );
-            },
-            default: argv.input,
-        });
-
-        argv.input = fileInit;
-    }
-
-    const spinner = createSpinner();
-
-    // Check if input is a file or directory
-    let isFile: boolean;
-    let isDir: boolean;
-    try {
-        isFile = fs.lstatSync(argv.input).isFile();
-        isDir = fs.lstatSync(argv.input).isDirectory();
-    } catch (_) {
-        isFile = false;
-        isDir = false;
-    }
-
-    // Check if local file or directory
-    if (isFile || isDir) {
-        let filePaths: string[] = [];
-
-        if (isDir) {
-            if (!(argv.input.endsWith("/") || argv.input.endsWith("\\"))) {
-                argv.input += "/";
-            }
-            await fs.promises
-                .readdir(argv.input, { withFileTypes: true })
-                .then((files) =>
-                    files.forEach((file) => {
-                        try {
-                            if (file.isDirectory()) {
-                                return;
-                            }
-                        } catch (err) {
-                            spinner.fail(err.message);
+        await fs.promises
+            .readdir(argv.input, { withFileTypes: true })
+            .then((files) =>
+                files.forEach((file) => {
+                    try {
+                        if (file.isDirectory()) {
                             return;
                         }
-                        filePaths.push(argv.input + file.name);
-                    })
+                    } catch (err) {
+                        spinner.fail(err.message);
+                        return;
+                    }
+                    filePaths.push(argv.input + file.name);
+                })
+            );
+
+        if (isInteractive) {
+            if (argv.type) {
+                argv.type[argv.type.findIndex((e) => e === "musicxml")] =
+                    "mxl";
+                argv.type[argv.type.findIndex((e) => e === "midi")] = "mid";
+                types = argv.type.map((e) =>
+                    INDV_DOWNLOADS.findIndex((f) => f.fileExt === e)
+                );
+            }
+            // build filetype choices
+            const typeChoices = INDV_DOWNLOADS.map((d, i) => ({
+                name: d.name,
+                value: i,
+            }));
+            // filetype selection
+            spinner.stop();
+
+            types = await checkbox({
+                message: i18next.t("cli_types_message"),
+                choices: typeChoices,
+                validate: checkboxValidate,
+            });
+
+            spinner.start();
+
+            // output directory
+            spinner.stop();
+            const output = await getOutputDir(argv.output);
+            spinner.start();
+            argv.output = output;
+        }
+    } else {
+        filePaths.push(argv.input);
+    }
+
+    await Promise.all(
+        filePaths.map(async (filePath) => {
+            createDirectoryIfNotExist(filePath);
+            // validate input file
+            if (!fs.statSync(filePath).isFile()) {
+                spinner.fail(i18next.t("cli_file_error"));
+                return;
+            }
+
+            if (!isInteractive) {
+                // validate types
+                if (argv.type.length === 0) {
+                    spinner.fail(i18next.t("cli_type_error"));
+                    return;
+                }
+            }
+
+            let inputFileExt = path.extname(filePath).substring(1);
+
+            if (inputFileExt === "mid") {
+                inputFileExt = "midi";
+            }
+            if (
+                ![
+                    "gp",
+                    "gp3",
+                    "gp4",
+                    "gp5",
+                    "gpx",
+                    "gtp",
+                    "kar",
+                    "midi",
+                    "mscx",
+                    "mscz",
+                    "musicxml",
+                    "mxl",
+                    "ptb",
+                    "xml",
+                ].includes(inputFileExt)
+            ) {
+                spinner.fail(i18next.t("cli_file_extension_error"));
+                return;
+            }
+
+            // get scoreinfo
+            let scoreinfo = new ScoreInfoObj(
+                0,
+                path.basename(filePath, "." + inputFileExt)
+            );
+
+            // load file
+            let score: WebMscore;
+            let metadata: import("webmscore/schemas").ScoreMetadata;
+            try {
+                // load local file
+                const data = await fs.promises.readFile(filePath);
+                await setMscz(scoreinfo, data.buffer);
+                if (argv.verbose) {
+                    spinner.info(i18next.t("cli_file_loaded_message"));
+                    spinner.start();
+                }
+                // load score using webmscore
+                score = await loadMscore(
+                    inputFileExt as InputFileFormat,
+                    scoreinfo
                 );
 
-            if (isInteractive) {
-                if (argv.type) {
-                    argv.type[argv.type.findIndex((e) => e === "musicxml")] =
-                        "mxl";
-                    argv.type[argv.type.findIndex((e) => e === "midi")] = "mid";
-                    types = argv.type.map((e) =>
-                        INDV_DOWNLOADS.findIndex((f) => f.fileExt === e)
-                    );
+                if (isInteractive && isFile) {
+                    metadata = await score.metadata();
                 }
+
+                if (argv.verbose) {
+                    spinner.info(i18next.t("cli_score_loaded_message"));
+                }
+            } catch (err) {
+                if (isFile || argv.verbose) {
+                    spinner.fail(err.message);
+                }
+                if (argv.verbose) {
+                    spinner.info(i18next.t("cli_input_error"));
+                }
+                return;
+            }
+
+            let parts;
+            if (isInteractive && isFile) {
+                // build part choices
+                const partChoices = metadata.excerpts.map((p) => ({
+                    name: p.title,
+                    value: p.id,
+                }));
+                // console.log(partChoices);
+                // add the "full score" option as a "part"
+                partChoices.unshift({
+                    value: -1,
+                    name: i18next.t("full_score"),
+                });
+
+                // part selection
+                spinner.stop();
+
+                parts = await checkbox({
+                    message: i18next.t("cli_parts_message"),
+                    choices: partChoices,
+                    validate: checkboxValidate,
+                });
+                // console.log(partChoices)
+                // console.log(parts);
+                spinner.start();
+
+                parts = partChoices.filter((e) =>
+                    parts.includes(e.value)
+                );
+                // console.log(parts);
+            } else {
+                parts = [{ name: i18next.t("full_score"), value: -1 }];
+            }
+
+            if (argv.type) {
+                argv.type[argv.type.findIndex((e) => e === "musicxml")] =
+                    "mxl";
+                argv.type[argv.type.findIndex((e) => e === "midi")] = "mid";
+                types = argv.type.map((e) =>
+                    INDV_DOWNLOADS.findIndex((f) => f.fileExt === e)
+                );
+            }
+            if (isInteractive && isFile) {
                 // build filetype choices
                 const typeChoices = INDV_DOWNLOADS.map((d, i) => ({
                     name: d.name,
@@ -274,383 +417,214 @@ void (async () => {
                 }));
                 // filetype selection
                 spinner.stop();
-                types = await inquirer.prompt<Params>({
-                    type: "checkbox",
-                    name: "types",
+
+                // TODO: 重复的代码
+                types = await checkbox({
                     message: i18next.t("cli_types_message"),
                     choices: typeChoices,
                     validate: checkboxValidate,
-                    pageSize: Infinity,
-                    default: types,
                 });
+
                 spinner.start();
+            }
 
-                types = types.types;
+            filetypes = types.map((i) => INDV_DOWNLOADS[i]);
 
+            if (isInteractive && isFile) {
                 // output directory
                 spinner.stop();
                 const output = await getOutputDir(argv.output);
                 spinner.start();
                 argv.output = output;
             }
-        } else {
-            filePaths.push(argv.input);
-        }
 
-        await Promise.all(
-            filePaths.map(async (filePath) => {
-                createDirectoryIfNotExist(filePath);
-                // validate input file
-                if (!fs.statSync(filePath).isFile()) {
-                    spinner.fail(i18next.t("cli_file_error"));
-                    return;
-                }
+            createDirectoryIfNotExist(argv.output);
 
-                if (!isInteractive) {
-                    // validate types
-                    if (argv.type.length === 0) {
-                        spinner.fail(i18next.t("cli_type_error"));
-                        return;
-                    }
-                }
-
-                let inputFileExt = path.extname(filePath).substring(1);
-
-                if (inputFileExt === "mid") {
-                    inputFileExt = "midi";
-                }
-                if (
-                    ![
-                        "gp",
-                        "gp3",
-                        "gp4",
-                        "gp5",
-                        "gpx",
-                        "gtp",
-                        "kar",
-                        "midi",
-                        "mscx",
-                        "mscz",
-                        "musicxml",
-                        "mxl",
-                        "ptb",
-                        "xml",
-                    ].includes(inputFileExt)
-                ) {
-                    spinner.fail(i18next.t("cli_file_extension_error"));
-                    return;
-                }
-
-                // get scoreinfo
-                let scoreinfo = new ScoreInfoObj(
-                    0,
-                    path.basename(filePath, "." + inputFileExt)
-                );
-
-                // load file
-                let score: WebMscore;
-                let metadata: import("webmscore/schemas").ScoreMetadata;
-                try {
-                    // load local file
-                    const data = await fs.promises.readFile(filePath);
-                    await setMscz(scoreinfo, data.buffer);
-                    if (argv.verbose) {
-                        spinner.info(i18next.t("cli_file_loaded_message"));
-                        spinner.start();
-                    }
-                    // load score using webmscore
-                    score = await loadMscore(
-                        inputFileExt as InputFileFormat,
-                        scoreinfo
-                    );
-
-                    if (isInteractive && isFile) {
-                        metadata = await score.metadata();
-                    }
-
-                    if (argv.verbose) {
-                        spinner.info(i18next.t("cli_score_loaded_message"));
-                    }
-                } catch (err) {
-                    if (isFile || argv.verbose) {
-                        spinner.fail(err.message);
-                    }
-                    if (argv.verbose) {
-                        spinner.info(i18next.t("cli_input_error"));
-                    }
-                    return;
-                }
-
-                let parts;
-                if (isInteractive && isFile) {
-                    // build part choices
-                    const partChoices = metadata.excerpts.map((p) => ({
-                        name: p.title,
-                        value: p.id,
-                    }));
-                    // console.log(partChoices);
-                    // add the "full score" option as a "part"
-                    partChoices.unshift({
-                        value: -1,
-                        name: i18next.t("full_score"),
-                    });
-
-                    // part selection
-                    spinner.stop();
-                    parts = await inquirer.prompt<Params>({
-                        type: "checkbox",
-                        name: "parts",
-                        message: i18next.t("cli_parts_message"),
-                        choices: partChoices,
-                        validate: checkboxValidate,
-                        pageSize: Infinity,
-                    });
-                    spinner.start();
-                    // console.log(parts);
-                    parts = partChoices.filter((e) =>
-                        parts.parts.includes(e.value)
-                    );
-                    // console.log(parts);
-                } else {
-                    parts = [{ name: i18next.t("full_score"), value: -1 }];
-                }
-
-                if (argv.type) {
-                    argv.type[argv.type.findIndex((e) => e === "musicxml")] =
-                        "mxl";
-                    argv.type[argv.type.findIndex((e) => e === "midi")] = "mid";
-                    types = argv.type.map((e) =>
-                        INDV_DOWNLOADS.findIndex((f) => f.fileExt === e)
-                    );
-                }
-                if (isInteractive && isFile) {
-                    // build filetype choices
-                    const typeChoices = INDV_DOWNLOADS.map((d, i) => ({
-                        name: d.name,
-                        value: i,
-                    }));
-                    // filetype selection
-                    spinner.stop();
-                    types = await inquirer.prompt<Params>({
-                        type: "checkbox",
-                        name: "types",
-                        message: i18next.t("cli_types_message"),
-                        choices: typeChoices,
-                        validate: checkboxValidate,
-                        pageSize: Infinity,
-                        default: types,
-                    });
-                    spinner.start();
-
-                    types = types.types;
-                }
-
-                filetypes = types.map((i) => INDV_DOWNLOADS[i]);
-
-                if (isInteractive && isFile) {
-                    // output directory
-                    spinner.stop();
-                    const output = await getOutputDir(argv.output);
-                    spinner.start();
-                    argv.output = output;
-                }
-
-                createDirectoryIfNotExist(argv.output);
-
-                // validate output directory
-                try {
-                    await fs.promises.access(argv.output);
-                } catch (err) {
-                    spinner.fail(err.message);
-                    return;
-                }
-
-                // export files
-                const fileName =
-                    scoreinfo.fileName || (await score.titleFilenameSafe());
-                // spinner.start();
-                for (const type of filetypes) {
-                    for (const part of parts) {
-                        // select part
-                        await score.setExcerptId(part.value);
-
-                        // generate file data
-                        const data = await type.action(score);
-
-                        // save to filesystem
-                        const n = `${fileName} - ${part.name}.${type.fileExt}`;
-                        const f = path.join(argv.output, n);
-                        await fs.promises.writeFile(f, data);
-                        if (argv.verbose) {
-                            spinner.info(
-                                i18next.t("cli_saved_message", {
-                                    file: chalk.underline(f),
-                                })
-                            );
-                        }
-                    }
-                }
-            })
-        );
-        spinner.succeed(i18next.t("cli_done_message"));
-        return;
-    } else {
-        // validate input URL
-        if (!argv.input.match(SCORE_URL_REG)) {
-            spinner.fail(i18next.t("cli_url_error"));
-            return;
-        }
-        argv.input = argv.input.match(SCORE_URL_REG)[0];
-
-        // validate types
-        if (!isInteractive) {
-            if (argv.type.length === 0) {
-                spinner.fail(i18next.t("cli_type_error"));
-                return;
-            } else if (
-                ["mscz", "mscx", "musicxml", "flac", "ogg"].some((e) =>
-                    argv.type.includes(e)
-                )
-            ) {
-                // Fail since user cannot download these types from a URL
-                spinner.fail(i18next.t("cli_url_type_error"));
+            // validate output directory
+            try {
+                await fs.promises.access(argv.output);
+            } catch (err) {
+                spinner.fail(err.message);
                 return;
             }
-        }
 
-        // request scoreinfo
-        let scoreinfo: ScoreInfoHtml = await ScoreInfoHtml.request(argv.input);
+            // export files
+            const fileName =
+                scoreinfo.fileName || (await score.titleFilenameSafe());
+            // spinner.start();
+            for (const type of filetypes) {
+                for (const part of parts) {
+                    // select part
+                    await score.setExcerptId(part.value);
 
-        // validate musescore URL
-        if (scoreinfo.id === 0) {
-            spinner.fail(i18next.t("cli_score_not_found"));
-            return;
-        }
+                    // generate file data
+                    const data = await type.action(score);
 
-        if (isInteractive) {
-            // confirmation
-            spinner.stop();
-            const { confirmed } = await inquirer.prompt<Params>({
-                type: "confirm",
-                name: "confirmed",
-                message: i18next.t("cli_confirm_message"),
-                prefix:
-                    `${chalk.yellow("!")} ` +
-                    i18next.t("id", { id: scoreinfo.id }) +
-                    "\n  " +
-                    i18next.t("title", { title: scoreinfo.title }) +
-                    "\n ",
-                default: true,
-            });
-            if (!confirmed) return;
-
-            // print a blank line
-            console.log();
-            spinner.start();
-        } else {
-            // print message if verbosity is enabled
-            if (argv.verbose) {
-                spinner.stop();
-                console.log(
-                    `${chalk.yellow("!")} ` +
-                        i18next.t("id", { id: scoreinfo.id }) +
-                        "\n  " +
-                        i18next.t("title", { title: scoreinfo.title }) +
-                        "\n "
-                );
-                spinner.start();
+                    // save to filesystem
+                    const n = `${fileName} - ${part.name}.${type.fileExt}`;
+                    const f = path.join(argv.output, n);
+                    await fs.promises.writeFile(f, data);
+                    if (argv.verbose) {
+                        spinner.info(
+                            i18next.t("cli_saved_message", {
+                                file: chalk.underline(f),
+                            })
+                        );
+                    }
+                }
             }
-        }
-
-        if (argv.type) {
-            types = argv.type;
-        }
-        if (isInteractive) {
-            // filetype selection
-            spinner.stop();
-            types = await inquirer.prompt<Params>({
-                type: "checkbox",
-                name: "types",
-                message: i18next.t("cli_types_message"),
-                choices: ["midi", "mp3", "pdf"],
-                validate: checkboxValidate,
-                pageSize: Infinity,
-                default: types,
-            });
-            types = types.types;
-
-            // output directory
-            const output = await getOutputDir(argv.output);
-            spinner.start();
-            argv.output = output;
-        }
-
-        createDirectoryIfNotExist(argv.output);
-
-        // validate output directory
-        try {
-            await fs.promises.access(argv.output);
-        } catch (err) {
-            spinner.fail(err.message);
-            return;
-        }
-
-        await Promise.all(
-            types.map(async (type) => {
-                // download/generate file data
-                let fileExt: String;
-                let fileData: Buffer;
-                switch (type) {
-                    case "midi": {
-                        fileExt = "mid";
-                        const fileUrl = await getFileUrl(
-                            scoreinfo.id,
-                            "midi",
-                            argv.input
-                        );
-                        fileData = await fetchBuffer(fileUrl);
-                        break;
-                    }
-                    case "mp3": {
-                        fileExt = "mp3";
-                        const fileUrl = await getFileUrl(
-                            scoreinfo.id,
-                            "mp3",
-                            argv.input
-                        );
-                        fileData = await fetchBuffer(fileUrl);
-                        break;
-                    }
-                    case "pdf": {
-                        fileExt = "pdf";
-                        fileData = Buffer.from(
-                            await exportPDF(
-                                scoreinfo,
-                                scoreinfo.sheet,
-                                argv.input
-                            )
-                        );
-                        break;
-                    }
-                }
-
-                // save to filesystem
-                const f = path.join(
-                    argv.output,
-                    `${scoreinfo.fileName}.${fileExt}`
-                );
-                await fs.promises.writeFile(f, fileData);
-                if (argv.verbose) {
-                    spinner.info(
-                        i18next.t("cli_saved_message", {
-                            file: chalk.underline(f),
-                        })
-                    );
-                }
-            })
-        );
-
-        spinner.succeed(i18next.t("cli_done_message"));
-        return;
+        })
+    );
+    spinner.succeed(i18next.t("cli_done_message"));
+    process.exit(0);
+} else {
+    // validate input URL
+    if (!argv.input.match(SCORE_URL_REG)) {
+        spinner.fail(i18next.t("cli_url_error"));
+        process.exit(0);
     }
-})();
+    argv.input = argv.input.match(SCORE_URL_REG)[0];
+
+    // validate types
+    if (!isInteractive) {
+        if (argv.type.length === 0) {
+            spinner.fail(i18next.t("cli_type_error"));
+            process.exit(0);
+        } else if (
+            ["mscz", "mscx", "musicxml", "flac", "ogg"].some((e) =>
+                argv.type.includes(e)
+            )
+        ) {
+            // Fail since user cannot download these types from a URL
+            spinner.fail(i18next.t("cli_url_type_error"));
+            process.exit(0);
+        }
+    }
+
+    // request scoreinfo
+    let scoreinfo: ScoreInfoHtml = await ScoreInfoHtml.request(argv.input);
+
+    // validate musescore URL
+    if (scoreinfo.id === 0) {
+        spinner.fail(i18next.t("cli_score_not_found"));
+        process.exit(0);
+    }
+
+    if (isInteractive) {
+        // confirmation
+        spinner.stop();
+
+        const confirmed = await confirm({
+            message: `${i18next.t("id", { id: scoreinfo.id })}
+  ${i18next.t("title", { title: scoreinfo.title })}
+  ${i18next.t("cli_confirm_message")}`,
+            default: true,
+        });
+
+        if (!confirmed) process.exit(0);
+
+        // print a blank line
+        console.log();
+        spinner.start();
+    } else {
+        // print message if verbosity is enabled
+        if (argv.verbose) {
+            spinner.stop();
+            console.log(
+                `${chalk.yellow("!")} ` +
+                i18next.t("id", { id: scoreinfo.id }) +
+                "\n  " +
+                i18next.t("title", { title: scoreinfo.title }) +
+                "\n "
+            );
+            spinner.start();
+        }
+    }
+
+    if (argv.type) {
+        types = argv.type;
+    }
+    if (isInteractive) {
+        // filetype selection
+        spinner.stop();
+
+        types = await checkbox({
+            message: i18next.t("cli_types_message"),
+            choices: ["midi", "mp3", "pdf"],
+            validate: checkboxValidate,
+        });
+
+        // output directory
+        const output = await getOutputDir(argv.output);
+        spinner.start();
+        argv.output = output;
+    }
+
+    createDirectoryIfNotExist(argv.output);
+
+    // validate output directory
+    try {
+        await fs.promises.access(argv.output);
+    } catch (err) {
+        spinner.fail(err.message);
+        process.exit(0);;
+    }
+
+    await Promise.all(
+        types.map(async (type) => {
+            // download/generate file data
+            let fileExt: String;
+            let fileData: Buffer;
+            switch (type) {
+                case "midi": {
+                    fileExt = "mid";
+                    const fileUrl = await getFileUrl(
+                        scoreinfo.id,
+                        "midi",
+                        argv.input
+                    );
+                    fileData = await fetchBuffer(fileUrl);
+                    break;
+                }
+                case "mp3": {
+                    fileExt = "mp3";
+                    const fileUrl = await getFileUrl(
+                        scoreinfo.id,
+                        "mp3",
+                        argv.input
+                    );
+                    fileData = await fetchBuffer(fileUrl);
+                    break;
+                }
+                case "pdf": {
+                    fileExt = "pdf";
+                    fileData = Buffer.from(
+                        await exportPDF(
+                            scoreinfo,
+                            scoreinfo.sheet,
+                            argv.input
+                        )
+                    );
+                    break;
+                }
+            }
+
+            // save to filesystem
+            const f = path.join(
+                argv.output,
+                `${scoreinfo.fileName}.${fileExt}`
+            );
+            await fs.promises.writeFile(f, fileData);
+            if (argv.verbose) {
+                spinner.info(
+                    i18next.t("cli_saved_message", {
+                        file: chalk.underline(f),
+                    })
+                );
+            }
+        })
+    );
+
+    spinner.succeed(i18next.t("cli_done_message"));
+    process.exit(0);
+}

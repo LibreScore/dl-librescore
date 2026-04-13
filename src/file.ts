@@ -86,9 +86,10 @@ const getApiAuthNetwork = async (
                                 );
 
                                 if (audioSources !== null) {
-                                    audioSources.querySelector(
-                                        "option[value='0']"
-                                    )?.selected = true;
+                                    const option = audioSources.querySelector("option[value='0']");
+                                    if (option) {
+                                        (option as HTMLOptionElement).selected = true;
+                                    }
 
                                     audioSources.dispatchEvent(
                                         new Event("change")
@@ -136,7 +137,7 @@ const getApiAuthNetwork = async (
                         numPages = parentDiv.children.length - 3;
                         let i = 0;
 
-                        function scrollToNextChild() {
+                        function scrollToNextChild () {
                             let childDiv = parentDiv.children[i];
                             if (childDiv) {
                                 childDiv.scrollIntoView();
