@@ -119,7 +119,7 @@ const main = (): void => {
                 name: i18next.t("download", { fileType: "MIDI" }),
                 action: BtnAction.download(
                     () => getFileUrl(scoreinfo.id, "midi"),
-                    scoreinfo.fileName,
+                    scoreinfo.fileName + ".mid",
                     fallback,
                     30 * 1000 /* 30s */
                 ),
@@ -129,7 +129,7 @@ const main = (): void => {
                 name: i18next.t("download", { fileType: "MP3" }),
                 action: BtnAction.download(
                     () => getFileUrl(scoreinfo.id, "mp3"),
-                    scoreinfo.fileName,
+                    scoreinfo.fileName + ".mp3",
                     fallback,
                     30 * 1000 /* 30s */
                 ),
