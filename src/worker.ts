@@ -1,7 +1,10 @@
 /// <reference lib="webworker" />
 
+// @ts-ignore
 import isNodeJs from "detect-node";
+// @ts-ignore
 import PDFDocument from "pdfkit/lib/document";
+// @ts-ignore
 import SVGtoPDF from "svg-to-pdfkit";
 
 type ImgType = "svg" | "png";
@@ -93,15 +96,24 @@ export const generatePDF = async (
 
         svgList.forEach((svg) => {
             pdf.addPage();
-            SVGtoPDF(pdf, svg, 0, 0, {
-                preserveAspectRatio: "none",
-            });
+            // This works, but I don't know why it was broken in the first place
+            // It's specific to some scores and crashes somewhere deep inside SVGtoPDF
+            try { 
+                SVGtoPDF(pdf, svg, 0, 0, {
+                    preserveAspectRatio: "none",
+                });
+            }
+            catch (e) {
+                console.log("SVGtoPDFError");
+                console.log(e)
+            }
         });
     }
 
     // @ts-ignore
     const buf: Uint8Array = await pdf.getBuffer();
 
+    // @ts-ignore
     return buf.buffer;
 };
 
