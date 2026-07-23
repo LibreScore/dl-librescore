@@ -9,6 +9,12 @@ const INDEX_REG = /index=(\d+)/;
 
 export const auths = {};
 
+// Image URLs captured directly from the player's own jmuse API responses.
+// The player always uses a valid token, so its responses give us the real
+// S3 image URL (no token needed) for each page — bypassing MD5/token guessing
+// entirely, which is what breaks (HTTP 422) when MuseScore rotates the scheme.
+export const imgUrls: Record<number, string> = {};
+
 (() => {
     if (isNodeJs) {
         // noop in CLI
@@ -30,6 +36,8 @@ export const auths = {};
                     hookNative(w, "fetch", () => {
                         return function (url, init) {
                             let token = init?.headers?.Authorization;
+                            let capturedType: string | undefined;
+                            let capturedIndex: string | undefined;
                             if (
                                 typeof url === "string" &&
                                 (token || url.match(INIT_PAGE_REG))
@@ -40,11 +48,33 @@ export const auths = {};
                                     const type = m[1];
                                     const index = i[1];
                                     auths[type + index] = token;
+                                    capturedType = type;
+                                    capturedIndex = index;
                                 } else if (url.match(INIT_PAGE_REG)) {
                                     auths["img0"] = url;
                                 }
                             }
-                            return fetch(url, init);
+
+                            const res = fetch(url, init);
+
+                            // For image API calls, read the player's own (valid)
+                            // response and cache the real image URL. This lets us
+                            // skip MD5/token guessing when building the PDF.
+                            if (capturedType === "img" && capturedIndex) {
+                                const idx = Number(capturedIndex);
+                                res.then((r) => r.clone().json())
+                                    .then((data) => {
+                                        const u = data?.info?.url;
+                                        if (typeof u === "string") {
+                                            imgUrls[idx] = u;
+                                        }
+                                    })
+                                    .catch(() => {
+                                        /* ignore: falls back to token path */
+                                    });
+                            }
+
+                            return res;
                         };
                     });
                 }
