@@ -102,6 +102,10 @@ const checkboxValidate = (input: number[]) => {
     return input.length >= 1;
 };
 
+const expandHomeDir = (input: string): string => {
+    return input.replace(/^~(?=$|[\\/])/, os.homedir());
+};
+
 const createDirectoryIfNotExist = (input: string) => {
     const dirExists = fs.existsSync(input);
 
@@ -119,23 +123,24 @@ const getOutputDir = async (defaultOutput: string) => {
         name: "output",
         message: i18next.t("cli_output_message"),
         async validate(input: string) {
+            const outputPath = expandHomeDir(input);
             if (!input) return false;
 
-            const dirExists = fs.existsSync(input);
+            const dirExists = fs.existsSync(outputPath);
 
             if (!dirExists) {
-                if (lastTryDir !== input) {
-                    lastTryDir = input;
+                if (lastTryDir !== outputPath) {
+                    lastTryDir = outputPath;
                     dirNotExistsTries = 0;
                 }
 
                 dirNotExistsTries++;
 
                 if (dirNotExistsTries >= 2) {
-                    fs.mkdirSync(input, { recursive: true });
+                    fs.mkdirSync(outputPath, { recursive: true });
                 } else {
                     try {
-                        fs.accessSync(input);
+                        fs.accessSync(outputPath);
                     } catch (e) {
                         return (
                             `${e.message}` +
@@ -145,12 +150,12 @@ const getOutputDir = async (defaultOutput: string) => {
                         );
                     }
                 }
-            } else if (!fs.statSync(input).isDirectory()) return false;
+            } else if (!fs.statSync(outputPath).isDirectory()) return false;
 
             dirNotExistsTries = 0;
 
             try {
-                fs.accessSync(input);
+                fs.accessSync(outputPath);
             } catch (e) {
                 return e.message;
             }
@@ -160,7 +165,7 @@ const getOutputDir = async (defaultOutput: string) => {
         default: defaultOutput,
     });
 
-    return output;
+    return expandHomeDir(output);
 };
 
 void (async () => {
@@ -181,6 +186,8 @@ void (async () => {
     let isInteractive = true;
     let types;
     let filetypes;
+
+    argv.output = expandHomeDir(argv.output);
 
     // Check if both input and type arguments are used
     if (argv.input && argv.type) {
