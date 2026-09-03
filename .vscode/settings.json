@@ -10,7 +10,7 @@
         "editor.formatOnSave": true
     },
     "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
+        "source.fixAll.eslint": "explicit"
     },
     "typescript.tsdk": "node_modules/typescript/lib",
     "i18n-ally.localesPaths": ["src/i18n"]

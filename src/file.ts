@@ -49,9 +49,10 @@ const getApiAuth = async (
     id: number,
     type: FileType,
     index: number,
-    scoreUrl: string
+    scoreUrl: string,
+    _fetch = getFetch()
 ): Promise<string> => {
-    const code = `${id}${type}${index}${await getSuffix(scoreUrl)}`;
+    const code = `${id}${type}${index}${await getSuffix(scoreUrl, _fetch)}`;
     return md5(code).slice(0, 4);
 };
 
@@ -203,7 +204,7 @@ export const getFileUrl = async (
     pageCount?: number
 ): Promise<string> => {
     const url = getApiUrl(id, type, index);
-    let auth = await getApiAuth(id, type, index, scoreUrl);
+    let auth = await getApiAuth(id, type, index, scoreUrl, _fetch);
     if (setText && pageCount) {
         const percent = Math.round(((index + 1) / pageCount) * 83);
         setText(`${percent}%`);

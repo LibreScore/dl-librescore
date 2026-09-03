@@ -93,6 +93,7 @@ export default [
     },
     {
         input: "src/cli.ts",
+        external: ["ws"],
         output: {
             file: "dist/cli.js",
             format: "cjs",

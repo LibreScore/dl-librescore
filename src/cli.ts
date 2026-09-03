@@ -7,12 +7,13 @@ import os from "os";
 import { setMscz } from "./mscz";
 import { loadMscore, INDV_DOWNLOADS, WebMscore } from "./mscore";
 import { ScoreInfoHtml, ScoreInfoObj } from "./scoreinfo";
-import { fetchBuffer } from "./utils";
+import { fetchBuffer, getFetch } from "./utils";
 import { isNpx, getVerInfo } from "./npm-data";
 import { getFileUrl } from "./file";
 import { exportPDF } from "./pdf";
 import i18nextInit, { i18next } from "./i18n/index";
 import { InputFileFormat } from "webmscore/schemas";
+import { getBrowserFetch, closeBrowserFetch } from "./browser-fetch";
 
 (async () => {
     await i18nextInit;
@@ -519,7 +520,20 @@ void (async () => {
         }
 
         // request scoreinfo
-        let scoreinfo: ScoreInfoHtml = await ScoreInfoHtml.request(argv.input);
+        let cliFetch = getFetch();
+        let scoreinfo: ScoreInfoHtml = await ScoreInfoHtml.request(
+            argv.input,
+            cliFetch
+        );
+        if (scoreinfo.status === 403) {
+            try {
+                cliFetch = await getBrowserFetch(argv.input);
+                scoreinfo = await ScoreInfoHtml.request(argv.input, cliFetch);
+            } catch (err) {
+                spinner.fail(err instanceof Error ? err.message : String(err));
+                return;
+            }
+        }
 
         // validate musescore URL
         if (scoreinfo.id === 0) {
@@ -606,7 +620,9 @@ void (async () => {
                         const fileUrl = await getFileUrl(
                             scoreinfo.id,
                             "midi",
-                            argv.input
+                            argv.input,
+                            0,
+                            cliFetch
                         );
                         fileData = await fetchBuffer(fileUrl);
                         break;
@@ -616,7 +632,9 @@ void (async () => {
                         const fileUrl = await getFileUrl(
                             scoreinfo.id,
                             "mp3",
-                            argv.input
+                            argv.input,
+                            0,
+                            cliFetch
                         );
                         fileData = await fetchBuffer(fileUrl);
                         break;
@@ -627,7 +645,9 @@ void (async () => {
                             await exportPDF(
                                 scoreinfo,
                                 scoreinfo.sheet,
-                                argv.input
+                                argv.input,
+                                undefined,
+                                cliFetch
                             )
                         );
                         break;
@@ -653,4 +673,4 @@ void (async () => {
         spinner.succeed(i18next.t("cli_done_message"));
         return;
     }
-})();
+})().finally(closeBrowserFetch);

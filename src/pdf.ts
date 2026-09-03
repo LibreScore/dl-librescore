@@ -3,7 +3,7 @@ import { PDFWorker } from "../dist/cache/worker";
 import { PDFWorkerHelper } from "./worker-helper";
 import { getFileUrl } from "./file";
 import { ScoreInfo, SheetInfo, Dimensions } from "./scoreinfo";
-import { fetchBuffer } from "./utils";
+import { getFetch } from "./utils";
 
 type _ExFn = (
     imgURLs: string[],
@@ -30,8 +30,18 @@ const _exportPDFBrowser: _ExFn = async (
     return pdfArrayBuffer;
 };
 
-const _exportPDFNode: _ExFn = async (imgURLs, imgType, dimensions) => {
-    const imgBufs = await Promise.all(imgURLs.map((url) => fetchBuffer(url)));
+const _exportPDFNode = async (
+    imgURLs: string[],
+    imgType: "svg" | "png",
+    dimensions: Dimensions,
+    _fetch = getFetch()
+): Promise<ArrayBuffer> => {
+    const imgBufs = await Promise.all(
+        imgURLs.map(async (url) => {
+            const response = await _fetch(url);
+            return Buffer.from(await response.arrayBuffer());
+        })
+    );
 
     const { generatePDF } = PDFWorker();
     const pdfArrayBuffer = (await generatePDF(
@@ -48,7 +58,8 @@ export const exportPDF = async (
     scoreinfo: ScoreInfo,
     sheet: SheetInfo,
     scoreUrl = "",
-    setText: (str: string) => void
+    setText?: (str: string) => void,
+    _fetch = getFetch()
 ): Promise<ArrayBuffer> => {
     const imgType = sheet.imgType;
     const pageCount = sheet.pageCount;
@@ -68,7 +79,7 @@ export const exportPDF = async (
                 "img",
                 scoreUrl,
                 i,
-                undefined,
+                _fetch,
                 setText,
                 pageCount
             );
@@ -80,7 +91,7 @@ export const exportPDF = async (
     if (!isNodeJs) {
         return _exportPDFBrowser(...args, setText);
     } else {
-        return _exportPDFNode(...args);
+        return _exportPDFNode(...args, _fetch);
     }
 };
 

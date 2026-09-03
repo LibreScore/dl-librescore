@@ -58,7 +58,7 @@ export class ScoreInfoHtml extends ScoreInfo {
     private readonly BASEURL_REG =
         /<meta property="og:image" content="(.+\/)score_.*">/;
 
-    constructor(private html: string) {
+    constructor(private html: string, public readonly status = 200) {
         super();
     }
 
@@ -89,7 +89,7 @@ export class ScoreInfoHtml extends ScoreInfo {
         _fetch = getFetch()
     ): Promise<ScoreInfoHtml> {
         const r = await _fetch(url);
-        if (!r.ok) return new ScoreInfoHtml("");
+        if (!r.ok) return new ScoreInfoHtml("", r.status);
 
         const html = await r.text();
         return new ScoreInfoHtml(html);
