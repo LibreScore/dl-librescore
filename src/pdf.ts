@@ -53,30 +53,38 @@ export const exportPDF = async (
     const imgType = sheet.imgType;
     const pageCount = sheet.pageCount;
 
+    // Image URLs are obtained via the API, including the first page:
+    // the static thumbnail URLs are no longer publicly accessible.
     const rs = Array.from({ length: pageCount }).map(async (_, i) => {
-        let url;
-        if (i === 0) {
-            // The url to the first page is static. We don't need to use API to obtain it.
-            url = sheet.thumbnailUrl;
-            if (setText) {
-                setText(`${Math.round((1 / pageCount) * 83)}%`);
-            }
-        } else {
-            // obtain image urls using the API
-            url = await getFileUrl(
-                scoreinfo.id,
-                "img",
-                scoreUrl,
-                i,
-                undefined,
-                setText,
-                pageCount
-            );
-        }
-        return url;
+        return getFileUrl(
+            scoreinfo.id,
+            "img",
+            scoreUrl,
+            i,
+            undefined,
+            setText,
+            pageCount
+        );
     });
     const sheetImgURLs = await Promise.all(rs);
-    const args = [sheetImgURLs, imgType, sheet.dimensions] as const;
+
+    let dimensions = sheet.dimensions;
+    if (!isNodeJs && (!dimensions.width || !dimensions.height)) {
+        // The DOM sheet image can fail to load, leaving its dimensions
+        // degenerate (0x0). Measure from the actual first-page image.
+        const blob = await fetch(sheetImgURLs[0], { cache: "no-cache" })
+            .then((r) => r.blob());
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
+        await img.decode();
+        URL.revokeObjectURL(img.src);
+        dimensions = {
+            width: img.naturalWidth,
+            height: img.naturalHeight,
+        };
+    }
+
+    const args = [sheetImgURLs, imgType, dimensions] as const;
     if (!isNodeJs) {
         return _exportPDFBrowser(...args, setText);
     } else {

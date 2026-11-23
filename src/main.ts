@@ -77,11 +77,6 @@ const main = (): void => {
         );
         const scoreinfo = new ScoreInfoInPage(document);
         const btnList = new BtnList();
-        let indvPartBtn: HTMLButtonElement | null = null;
-        const fallback = () => {
-            // btns fallback to load from MSCZ file (`Individual Parts`)
-            return indvPartBtn?.click();
-        };
 
         if (noSub && isOfficial) {
             btnList.add({
@@ -108,7 +103,7 @@ const main = (): void => {
                         );
                     },
 
-                    fallback,
+                    undefined,
                     3 * 60 * 1000 /* 3min */
                 ),
             });
@@ -120,7 +115,7 @@ const main = (): void => {
                 action: BtnAction.download(
                     () => getFileUrl(scoreinfo.id, "midi"),
                     scoreinfo.fileName,
-                    fallback,
+                    undefined,
                     30 * 1000 /* 30s */
                 ),
             });
@@ -130,7 +125,7 @@ const main = (): void => {
                 action: BtnAction.download(
                     () => getFileUrl(scoreinfo.id, "mp3"),
                     scoreinfo.fileName,
-                    fallback,
+                    undefined,
                     30 * 1000 /* 30s */
                 ),
             });

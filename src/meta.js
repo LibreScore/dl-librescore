@@ -9,7 +9,7 @@
 // @description  Download sheet music
 // @author       LibreScore
 // @icon         https://librescore.org/img/icons/logo.svg
-// @match        https://musescore.com/*/*
+// @match        https://musescore.com/*
 // @match        https://s.musescore.com/*/*
 // @license      MIT
 // @copyright    Copyright (c) 2024 LibreScore
@@ -22,5 +22,7 @@
 // @connect      musescore.com
 // @connect      ultimate-guitar.com
 // @connect      wasabisys.com
+// @connect      ustatik.com
+// @connect      cdn.ustatik.com
 // @run-at       document-start
 // ==/UserScript==
